@@ -191,13 +191,20 @@ summary { cursor: pointer; color: var(--accent); }
       <li>Inside the keep ring, the <b>empty slot</b> is where each item goes, one at a time. Putting <span class="mono">nums</span> there hands keep the <b>whole list</b> every time, not one number.</li>
       <li><span class="mono">mod 2</span> gives the remainder after dividing by 2. Odd numbers have remainder <b>1</b>. Even numbers have remainder <b>0</b>.</li>
     </ul>
-    <p style="margin:6px 0">Try it on <span class="mono">nums = [3, 4, 7, 10, 5]</span>. Click a number to see what keep asks about it.</p>
-    <div class="chips" id="p4-learn-chips"></div>
-    <div id="p4-learn-msg"></div>
-    <details><summary>Show the fixed block</summary>
-      <div class="blocks-wrap" data-sb="p4Fixed"></div>
-      <p class="sub">The sum of the odd numbers in [3, 4, 7, 10, 5] is 3 + 7 + 5 = 15.</p>
-    </details>
+    <p style="margin:6px 0">Run it <b>as written</b> on <span class="mono">nums = [3, 4, 7, 10, 5]</span>, one item at a time.</p>
+    <div class="row" style="margin:8px 0">
+      <button id="p4w-next" class="primary">Next step</button><button id="p4w-all">Show all</button><button id="p4w-reset">Start over</button>
+    </div>
+    <div style="overflow-x:auto"><table class="trace" id="p4w-table"></table></div>
+    <div id="p4w-msg"></div>
+    <h3>The fixed block</h3>
+    <div class="blocks-wrap" data-sb="p4Fixed"></div>
+    <p style="margin:6px 0">Two changes: the <b>empty slot</b> instead of <span class="mono">nums</span>, so keep tests one number at a time, and <b>1</b> instead of 0, so it keeps the odd numbers. Run it on the same list.</p>
+    <div class="row" style="margin:8px 0">
+      <button id="p4f-next" class="primary">Next step</button><button id="p4f-all">Show all</button><button id="p4f-reset">Start over</button>
+    </div>
+    <div style="overflow-x:auto"><table class="trace" id="p4f-table"></table></div>
+    <div id="p4f-msg"></div>
   </div>
   <div class="earn-box">
     <span class="tag earn">Earn</span>
@@ -567,18 +574,30 @@ function p3Render() {
 
 /* ================= PROBLEM 4 ================= */
 const P4_LEARN_NUMS = [3, 4, 7, 10, 5];
+function stepper(prefix, headers, rows, doneHTML) {
+  let step = 0;
+  const draw = () => {
+    let h = "<tr>" + headers.map((x) => `<th>${x}</th>`).join("") + "</tr>";
+    rows.slice(0, step).forEach((r, k) => { h += `<tr class="${k === step - 1 ? "now" : ""}">` + r.map((c) => `<td class="mono">${c}</td>`).join("") + "</tr>"; });
+    $(prefix + "-table").innerHTML = h;
+    if (step >= rows.length) msgHTML($(prefix + "-msg"), "info", doneHTML); else $(prefix + "-msg").innerHTML = "";
+    $(prefix + "-next").disabled = step >= rows.length;
+  };
+  $(prefix + "-next").onclick = () => { step++; draw(); };
+  $(prefix + "-all").onclick = () => { step = rows.length; draw(); };
+  $(prefix + "-reset").onclick = () => { step = 0; draw(); };
+  draw();
+}
 function p4Learn() {
-  $("p4-learn-chips").innerHTML = "";
-  P4_LEARN_NUMS.forEach((x) => {
-    const c = document.createElement("span"); c.className = "chip"; c.textContent = x;
-    c.onclick = () => {
-      const odd = x % 2 === 1;
-      msgHTML($("p4-learn-msg"), "info",
-        `<b>As written</b>, keep asks <span class="mono">0 = (nums mod 2)</span>. That uses the whole list <span class="mono">[3, 4, 7, 10, 5]</span>, not ${x}, so it asks the same thing for every item, and the answer is a list, not true or false. Keep can't use that.<br>` +
-        `<b>Fixed</b>, keep asks <span class="mono">1 = (${x} mod 2)</span>. ${x} mod 2 is ${x % 2}, so the answer is <b>${odd}</b> and ${x} is <b>${odd ? "kept" : "dropped"}</b>.`);
-    };
-    $("p4-learn-chips").appendChild(c);
-  });
+  const L = P4_LEARN_NUMS, Ls = "[" + L.join(", ") + "]", mods = "[" + L.map((x) => x % 2).join(", ") + "]";
+  stepper("p4w", ["item keep is testing", "what keep asks", "nums mod 2", "0 = that?", "kept?"],
+    L.map((x) => [x, `0 = (${Ls} mod 2)`, mods, "<b>false</b>", "dropped"]),
+    `Every answer is <b>false</b>. Look at what keep asks: it never uses the item. It uses <span class="mono">nums</span>, the whole list, so <span class="mono">nums mod 2</span> is the list <span class="mono">${mods}</span>, and 0 is never equal to a list. ` +
+    `Keep drops every number, the list it hands to combine is empty, and the block reports <b>0</b> instead of 15.`);
+  const kept = L.filter((x) => x % 2 === 1);
+  stepper("p4f", ["item keep is testing", "what keep asks", "item mod 2", "1 = that?", "kept?"],
+    L.map((x) => [x, `1 = (${x} mod 2)`, x % 2, `<b>${x % 2 === 1}</b>`, x % 2 === 1 ? "<b>kept</b>" : "dropped"]),
+    `Keep reports <span class="mono">[${kept.join(", ")}]</span>. Combine adds them up: ${kept.join(" + ")} = <b>${kept.reduce((a, b) => a + b, 0)}</b>.`);
 }
 let p4 = null;
 function p4New() {
@@ -668,6 +687,7 @@ function addSlot(container, label, options, onPick, shape) {
    inside a comparison makes the keep test report a list, which Snap rejects. */
 const LIST = (v) => Array.isArray(v);
 function cmp(op, a, b) {
+  if (op === "=" && (LIST(a) || LIST(b))) return LIST(a) && LIST(b) && a.join() === b.join();
   if (LIST(a) || LIST(b)) return { err: "compares a whole list, so the test does not report true or false for one item" };
   if (op === "=") return String(a).toLowerCase() === String(b).toLowerCase();
   const x = Number(a), y = Number(b);
@@ -912,7 +932,7 @@ if (location.search.includes("selftest")) {
   eq("mys words test", mysWordsKeep(P2_LEARN, 5), ["iron", "oak", "catapult"]);
   eq("p5 learn right", p5Eval(P5_LEARN, { left: "first", right: "letter", list: "words" }, P5_LEARN.tests[0]), ["giraffe", "girl", "goat"]);
   eq("p5 learn swapped", p5Eval(P5_LEARN, { left: "letter", right: "empty", list: "words" }, P5_LEARN.tests[0]), []);
-  eq("p5 learn words-in-test errs", !!p5Eval(P5_LEARN, { left: "firstWords", right: "letter", list: "words" }, P5_LEARN.tests[0]).err, true);
+  eq("p5 learn words-in-test keeps nothing", p5Eval(P5_LEARN, { left: "firstWords", right: "letter", list: "words" }, P5_LEARN.tests[0]), []);
   const F0 = P5_FRESH[0];
   eq("p5 nums right", p5Eval(F0, { left: "empty", op: ">", right: "limit", list: "nums" }, F0.tests[0]), [12, 30, 15]);
   eq("p5 nums flipped ok", p5Eval(F0, { left: "limit", op: "<", right: "empty", list: "nums" }, F0.tests[0]), [12, 30, 15]);
@@ -923,6 +943,8 @@ if (location.search.includes("selftest")) {
   eq("p5 vowel right", p5Eval(F2, { left: "first", list: "words" }, F2.tests[0]), ["apple", "igloo", "egg"]);
   p6 = { k: 2 }; eq("p6 test example", p6Run(["keep", "map", "combine"], [5, "a", "b", 4, "c", 1050, ":)"]).v, 2118);
   eq("p6 map first errs", !!p6Run(["map", "keep", "combine"], [5, "a"]).err, true);
+  $("p4w-all").click(); eq("p4 as-written all false", $("p4w-table").textContent.split("false").length - 1, 5);
+  $("p4f-all").click(); eq("p4 fixed sums to 15", $("p4f-msg").textContent.includes("3 + 7 + 5 = 15"), true);
   // problem 2 Learn table: a wrong row, then every row right
   const fillRow = (k, vals) => { const tr = $("p2-table").querySelector(`tr[data-k="${k}"]`); for (const [c, v] of Object.entries(vals)) tr.querySelector(`[data-c="${c}"]`).value = v; tr.querySelector(".rowcheck").click(); return tr; };
   const wrongRow = fillRow(1, { len: "5", gt: "true", first: "b", v: "false", or: "true", keep: "keep" });
