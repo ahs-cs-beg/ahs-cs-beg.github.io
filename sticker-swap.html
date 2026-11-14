@@ -85,7 +85,7 @@ summary { cursor: pointer; color: var(--accent); }
 <body>
 <header>
   <h1>Sticker Swap: Matching Two Lists</h1>
-  <p>You and Jay both collect stickers. Use keep to find the stickers you both have, and the ones only one of you has.</p>
+  <p>You and Jay both collect stickers. Loop through one list to find the stickers you both have, and the ones only one of you has.</p>
 </header>
 <main>
 
@@ -95,24 +95,24 @@ summary { cursor: pointer; color: var(--accent); }
     <label>Period <input type="text" id="who-period" autocomplete="off" style="min-width:70px;width:70px"></label>
   </div>
   <p class="sub" style="margin-top:10px">Your stickers are in a list called <span class="mono">mine</span>. Jay's are in <span class="mono">theirs</span>.
-  There are six levels. Do them in order. Your progress is saved in this browser.</p>
+  You will loop through one list, ask if the other list <b>contains</b> each sticker, and <b>add</b> the ones you want to a new list <span class="mono">m</span>.
+  There are eight levels. Do them in order. Your progress is saved in this browser.</p>
   <div class="blocks-wrap" id="intro-lists"></div>
 </div>
 
 <!-- LEVEL 1 -->
 <div class="card" id="l1">
   <span class="status" id="st-l1"></span>
-  <h2>Level 1: Stickers we BOTH have</h2>
-  <p class="sub">Keep asks a question about each sticker in <span class="mono">mine</span>, one at a time. Here the question is: "Does Jay's list contain this sticker?"</p>
+  <h2>Level 1: for each, stickers we BOTH have</h2>
+  <p class="sub"><b>for each</b> hands you the stickers in <span class="mono">mine</span> one at a time, in the variable <span class="mono">item</span>.
+  The if asks: does Jay's list contain this sticker? If yes, it gets added to <span class="mono">m</span>.</p>
   <div class="blocks-wrap" id="l1-sb"></div>
-  <p style="margin:6px 0"><b>Predict first.</b> Click the stickers in <span class="mono">mine</span> you think keep will report. Then step through it.</p>
+  <p style="margin:6px 0"><b>Predict first.</b> Click the stickers you think end up in <span class="mono">m</span>. Then step through it.</p>
   <div class="albums" id="l1-albums"></div>
   <div class="row"><button id="l1-predict" class="primary">Lock in my guess</button></div>
   <div id="l1-predict-msg"></div>
   <div id="l1-stepper" hidden>
-    <div class="row" style="margin:10px 0">
-      <button id="l1-next" class="primary">Next sticker</button><button id="l1-all">Show all</button><button id="l1-reset">Start over</button>
-    </div>
+    <div class="row" style="margin:10px 0"><button id="l1-next" class="primary">Next pass</button><button id="l1-all">Show all</button><button id="l1-reset">Start over</button></div>
     <div style="overflow-x:auto"><table class="trace" id="l1-table"></table></div>
     <div id="l1-msg"></div>
   </div>
@@ -121,8 +121,8 @@ summary { cursor: pointer; color: var(--accent); }
 <!-- LEVEL 2 -->
 <div class="card" id="l2">
   <span class="status" id="st-l2"></span>
-  <h2>Level 2: Build the BOTH block</h2>
-  <p class="sub">Put the pieces in the right spots. Click Run to try it on the stickers. It has to work on a second pair of albums too.</p>
+  <h2>Level 2: Build it with for each</h2>
+  <p class="sub">Put the pieces in the right spots and click Run. It has to work on a second pair of albums too.</p>
   <div class="goal">Goal: report the stickers that are in BOTH albums.</div>
   <div class="slots" id="l2-slots"></div>
   <div class="blocks-wrap" id="l2-sb"></div>
@@ -133,17 +133,16 @@ summary { cursor: pointer; color: var(--accent); }
 <!-- LEVEL 3 -->
 <div class="card" id="l3">
   <span class="status" id="st-l3"></span>
-  <h2>Level 3: Stickers only I have</h2>
-  <p class="sub">Trade time. Jay wants the stickers you have that Jay does NOT have. Same keep, same question, but wrapped in <b>not</b>, so the answer flips.</p>
+  <h2>Level 3: for i, the same job by counting</h2>
+  <p class="sub"><b>for i</b> does not hand you the sticker. It hands you a <b>number</b>: 1, then 2, then 3, up to the length of the list.
+  You get the sticker yourself with <span class="mono">item (i) of (mine)</span>.</p>
   <div class="blocks-wrap" id="l3-sb"></div>
+  <p style="margin:6px 0"><b>Predict first.</b> Click the stickers you think end up in <span class="mono">m</span>.</p>
   <div class="albums" id="l3-albums"></div>
-  <p style="margin:6px 0"><b>Predict first.</b> Click the stickers in <span class="mono">mine</span> you think keep will report.</p>
   <div class="row"><button id="l3-predict" class="primary">Lock in my guess</button></div>
   <div id="l3-predict-msg"></div>
   <div id="l3-stepper" hidden>
-    <div class="row" style="margin:10px 0">
-      <button id="l3-next" class="primary">Next sticker</button><button id="l3-all">Show all</button><button id="l3-reset">Start over</button>
-    </div>
+    <div class="row" style="margin:10px 0"><button id="l3-next" class="primary">Next pass</button><button id="l3-all">Show all</button><button id="l3-reset">Start over</button></div>
     <div style="overflow-x:auto"><table class="trace" id="l3-table"></table></div>
     <div id="l3-msg"></div>
   </div>
@@ -152,10 +151,9 @@ summary { cursor: pointer; color: var(--accent); }
 <!-- LEVEL 4 -->
 <div class="card" id="l4">
   <span class="status" id="st-l4"></span>
-  <h2>Level 4: Build it for any goal</h2>
-  <p class="sub">Now you choose whether to use <b>not</b>. Get three goals right to finish the level.</p>
-  <div class="progress" id="l4-progress"></div>
-  <div class="goal" id="l4-goal"></div>
+  <h2>Level 4: Build it with for i</h2>
+  <p class="sub">Careful: <span class="mono">i</span> is a number, not a sticker.</p>
+  <div class="goal">Goal: report the stickers that are in BOTH albums.</div>
   <div class="slots" id="l4-slots"></div>
   <div class="blocks-wrap" id="l4-sb"></div>
   <div class="row"><button id="l4-run" class="primary">Run</button></div>
@@ -165,25 +163,55 @@ summary { cursor: pointer; color: var(--accent); }
 <!-- LEVEL 5 -->
 <div class="card" id="l5">
   <span class="status" id="st-l5"></span>
-  <h2>Level 5: What does it report?</h2>
-  <p class="sub">Read the block. Click the stickers it reports, then check. Get four right to finish the level.</p>
-  <div class="progress" id="l5-progress"></div>
+  <h2>Level 5: Stickers only I have</h2>
+  <p class="sub">Trade time. Jay wants the stickers you have that Jay does NOT have. Same loop, same question, but wrapped in <b>not</b>, so the answer flips.</p>
   <div class="blocks-wrap" id="l5-sb"></div>
   <div class="albums" id="l5-albums"></div>
-  <div class="row"><button id="l5-check" class="primary">Check</button></div>
-  <div id="l5-msg"></div>
+  <p style="margin:6px 0"><b>Predict first.</b> Click the stickers you think end up in <span class="mono">m</span>.</p>
+  <div class="row"><button id="l5-predict" class="primary">Lock in my guess</button></div>
+  <div id="l5-predict-msg"></div>
+  <div id="l5-stepper" hidden>
+    <div class="row" style="margin:10px 0"><button id="l5-next" class="primary">Next pass</button><button id="l5-all">Show all</button><button id="l5-reset">Start over</button></div>
+    <div style="overflow-x:auto"><table class="trace" id="l5-table"></table></div>
+    <div id="l5-msg"></div>
+  </div>
 </div>
 
 <!-- LEVEL 6 -->
 <div class="card" id="l6">
   <span class="status" id="st-l6"></span>
-  <h2>Level 6: Not just stickers</h2>
-  <p class="sub">Same two blocks, different lists. Pick the block that answers the question. Get four right to finish.</p>
+  <h2>Level 6: Build it for any goal</h2>
+  <p class="sub">Now you choose whether to use <b>not</b>, with both kinds of loop. Get three goals right to finish the level.</p>
   <div class="progress" id="l6-progress"></div>
   <div class="goal" id="l6-goal"></div>
-  <div class="choices" id="l6-choices"></div>
-  <div class="row"><button id="l6-check" class="primary">Check</button></div>
-  <div id="l6-msg"></div>
+  <div class="slots" id="l6-slots"></div>
+  <div class="blocks-wrap" id="l6-sb"></div>
+  <div class="row"><button id="l6-run" class="primary">Run</button></div>
+  <div id="l6-out"></div>
+</div>
+
+<!-- LEVEL 7 -->
+<div class="card" id="l7">
+  <span class="status" id="st-l7"></span>
+  <h2>Level 7: What ends up in m?</h2>
+  <p class="sub">Read the script. Click the stickers it reports, then check. Get four right to finish the level.</p>
+  <div class="progress" id="l7-progress"></div>
+  <div class="blocks-wrap" id="l7-sb"></div>
+  <div class="albums" id="l7-albums"></div>
+  <div class="row"><button id="l7-check" class="primary">Check</button></div>
+  <div id="l7-msg"></div>
+</div>
+
+<!-- LEVEL 8 -->
+<div class="card" id="l8">
+  <span class="status" id="st-l8"></span>
+  <h2>Level 8: Not just stickers</h2>
+  <p class="sub">Same loops, different lists. Pick the script that answers the question. Get four right to finish.</p>
+  <div class="progress" id="l8-progress"></div>
+  <div class="goal" id="l8-goal"></div>
+  <div class="choices" id="l8-choices"></div>
+  <div class="row"><button id="l8-check" class="primary">Check</button></div>
+  <div id="l8-msg"></div>
 </div>
 
 <div class="card" id="summary">
@@ -203,7 +231,7 @@ const pick = (a) => a[Math.floor(Math.random() * a.length)];
 function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function sb(el, text, scale) {
   el.innerHTML = ""; const pre = document.createElement("pre"); pre.className = "blocks"; pre.textContent = text; el.appendChild(pre);
-  try { snapblocks.renderElement(pre, { style: "snap", scale: scale || 1.25 }); } catch (e) {}
+  try { snapblocks.renderElement(pre, { style: "snap", scale: scale || 1.2 }); } catch (e) {}
 }
 function msg(el, kind, html) { el.innerHTML = '<div class="msg ' + kind + '">' + html + "</div>"; }
 const sbList = (xs) => "(list " + xs.map((w) => "[" + w + "]").join(" ") + " @<:>)";
@@ -212,103 +240,135 @@ const sbList = (xs) => "(list " + xs.map((w) => "[" + w + "]").join(" ") + " @<:
 const EMOJI = { cat: "🐱", dog: "🐶", octopus: "🐙", pizza: "🍕", rocket: "🚀", taco: "🌮", star: "⭐", ghost: "👻", frog: "🐸",
   robot: "🤖", donut: "🍩", whale: "🐳", alien: "👽", unicorn: "🦄", cactus: "🌵", dragon: "🐉", panda: "🐼", rainbow: "🌈" };
 const NAMES = Object.keys(EMOJI);
-function stickerEl(name, asButton) {
-  const el = document.createElement(asButton ? "button" : "span");
-  el.className = "sticker"; el.dataset.name = name; el.innerHTML = EMOJI[name] + "<small>" + name + "</small>";
-  if (asButton) { el.type = "button"; el.onclick = () => el.classList.toggle("on"); el.setAttribute("aria-label", name); }
+function stickerEl(v, asButton) {
+  const el = document.createElement(asButton ? "button" : "span"); el.className = "sticker";
+  if (Array.isArray(v)) { el.innerHTML = "📚<small>whole list</small>"; el.dataset.name = "[list]"; }
+  else if (typeof v === "number") { el.innerHTML = "<b style=\"font-size:1.4rem\">" + v + "</b><small>a number</small>"; el.dataset.name = String(v); }
+  else if (v === "") { el.innerHTML = "&nbsp;<small>(blank)</small>"; el.dataset.name = ""; }
+  else { el.innerHTML = EMOJI[v] + "<small>" + v + "</small>"; el.dataset.name = v; }
+  if (asButton) { el.type = "button"; el.onclick = () => el.classList.toggle("on"); el.setAttribute("aria-label", String(v)); }
   return el;
 }
-function album(kind, title, names, clickable) {
+function album(kind, title, items, clickable) {
   const d = document.createElement("div"); d.className = "album " + kind;
   d.innerHTML = `<h4>${title}</h4>`; const s = document.createElement("div"); s.className = "stickers";
-  names.forEach((n) => s.appendChild(stickerEl(n, clickable))); d.appendChild(s); return d;
+  items.forEach((n) => s.appendChild(stickerEl(n, clickable)));
+  if (!items.length) s.innerHTML = '<span class="sub">an empty list</span>';
+  d.appendChild(s); return d;
 }
 function makePair(nMine, nTheirs, overlap) {
   const pool = shuffle(NAMES); const both = pool.slice(0, overlap);
-  const mineOnly = pool.slice(overlap, overlap + nMine - overlap); const theirsOnly = pool.slice(nMine, nMine + nTheirs - overlap);
+  const mineOnly = pool.slice(overlap, nMine); const theirsOnly = pool.slice(nMine, nMine + nTheirs - overlap);
   return { mine: shuffle([...both, ...mineOnly]), theirs: shuffle([...both, ...theirsOnly]) };
 }
 
-/* ---------- the four keeps ---------- */
-// spec = { from: "mine"|"theirs", other: "mine"|"theirs", item: "empty"|..., not: bool }
-function runKeep(spec, env) {
-  const from = env[spec.from];
-  if (!Array.isArray(from)) return { err: "keep needs a list in the from spot" };
-  const out = [];
-  for (const it of from) {
-    const listToSearch = env[spec.other];
-    const what = spec.item === "empty" ? it : env[spec.item];
-    let ans = listToSearch.includes(what);
-    if (spec.not) ans = !ans;
-    if (ans) out.push(it);
-  }
-  return out;
+/* ---------- the loop scripts ----------
+   for each: { loop:"each", over, search, ask:"item"|"mine"|"theirs", add:"item"|"mine", not }
+   for i:    { loop:"i", bound, search, ask:"elem:mine"|"elem:theirs"|"i", add:"elem:mine"|"elem:theirs"|"i", not } */
+const DEFAULT_NAMES = { mine: "mine", theirs: "theirs" };
+function valText(v, n) {
+  if (v === null || v === undefined) return "[ ]";
+  if (v === "item") return "(item)";
+  if (v === "i") return "(i)";
+  if (v.startsWith("elem:")) return `(item (i) of (${n[v.slice(5)]}))`;
+  return `(${n[v]})`;
 }
-const keepText = (spec, names) => {
-  const n = names || { mine: "mine", theirs: "theirs" };
-  const item = spec.item === "empty" ? "()" : spec.item ? `(${n[spec.item] || spec.item})` : "[ ]";
-  const other = spec.other ? `(${n[spec.other]})` : "[ ]";
-  const from = spec.from ? `(${n[spec.from]})` : "[ ]";
-  let test = `<${other} contains ${item}>`;
-  if (spec.not) test = `<not ${test}>`;
-  return `(keep items (${test} @>) from ${from})`;
+function scriptText(sp, names) {
+  const n = names || DEFAULT_NAMES; const L = (x) => (x ? `(${n[x]})` : "[ ]");
+  let test = `<${L(sp.search)} contains ${valText(sp.ask, n)}>`;
+  if (sp.not) test = `<not ${test}>`;
+  const head = sp.loop === "each" ? `for each ((item)) in ${L(sp.over)} {` : `for ((i)) = (1) to ([length V] of ${L(sp.bound)}) {`;
+  return `script variables ((m)) @addInput
+set [m v] to (list @addInput)
+${head}
+  if ${test} {
+    add ${valText(sp.add, n)} to (m)
+  }
+}${sp.loop === "i" ? " @loop" : ""}
+report (m)`;
+}
+function value(v, env, item, i) {
+  if (v === "item") return item;
+  if (v === "i") return i;
+  if (v.startsWith("elem:")) { const xs = env[v.slice(5)]; return i <= xs.length ? xs[i - 1] : ""; }
+  return env[v];
+}
+function runScript(sp, env) {
+  const m = []; const rows = [];
+  const visit = (item, i) => {
+    const asked = value(sp.ask, env, item, i);
+    const has = env[sp.search].includes(asked);
+    const ans = sp.not ? !has : has;
+    const added = ans ? value(sp.add, env, item, i) : undefined;
+    if (ans) m.push(added);
+    rows.push({ item, i, asked, has, ans, added, m: m.slice() });
+  };
+  if (sp.loop === "each") env[sp.over].forEach((it) => visit(it, null));
+  else for (let i = 1; i <= env[sp.bound].length; i++) visit(null, i);
+  return { m, rows };
+}
+const show = (v) => Array.isArray(v) ? "the whole list" : v === "" ? "(blank)" : typeof v === "number" ? String(v) : EMOJI[v] + " " + v;
+const showList = (xs) => "[" + xs.map(show).join(", ") + "]";
+const sameItems = (a, b) => a.length === b.length && a.every((x) => typeof x === "string" && b.includes(x));
+
+const GOALS = {
+  both: { text: "Report the stickers that are in BOTH albums.", f: (e) => e.mine.filter((x) => e.theirs.includes(x)) },
+  onlyMine: { text: "Report the stickers that are in mine but NOT in theirs.", f: (e) => e.mine.filter((x) => !e.theirs.includes(x)) },
+  onlyTheirs: { text: "Report the stickers that are in theirs but NOT in mine.", f: (e) => e.theirs.filter((x) => !e.mine.includes(x)) },
 };
-const sameSet = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
 
 /* ---------- saved state ---------- */
-const KEY = "bcs-sticker-swap-v1";
-let S = { name: "", period: "", done: {}, l4: 0, l5: 0, l6: 0, tries: {} };
+const KEY = "bcs-sticker-swap-v2";
+const LEVELS = { l1: "1  for each: both have", l2: "2  build it with for each", l3: "3  for i: both have", l4: "4  build it with for i",
+  l5: "5  only I have (not)", l6: "6  build it for any goal", l7: "7  what ends up in m?", l8: "8  not just stickers" };
+let S = { name: "", period: "", done: {}, l6: 0, l7: 0, l8: 0, tries: {} };
 try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch (e) {}
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} renderSummary(); }
-const LEVELS = { l1: "1  stickers we both have", l2: "2  build the both block", l3: "3  stickers only I have", l4: "4  build it for any goal", l5: "5  what does it report?", l6: "6  not just stickers" };
 function finish(l) { if (!S.done[l]) { S.done[l] = new Date().toISOString(); save(); } status(); }
 function tried(l) { S.tries[l] = (S.tries[l] || 0) + 1; save(); }
 function status() {
   Object.keys(LEVELS).forEach((l) => { const el = $("st-" + l); el.textContent = S.done[l] ? "✔ done" : "not done yet"; el.classList.toggle("done", !!S.done[l]); });
-  prog("l4-progress", S.l4, 3); prog("l5-progress", S.l5, 4); prog("l6-progress", S.l6, 4);
+  prog("l6-progress", S.l6, 3); prog("l7-progress", S.l7, 4); prog("l8-progress", S.l8, 4);
 }
 function prog(id, n, max) { $(id).innerHTML = Array.from({ length: max }, (_, i) => `<span class="${i < n ? "ok" : ""}">${i < n ? "✔" : i + 1}</span>`).join(""); }
 
 /* ---------- slot picker ---------- */
-function addSlot(container, label, options, onPick, preset) {
+function addSlot(container, label, options, onPick) {
   const lab = document.createElement("label"); lab.textContent = label;
   const box = document.createElement("div"); box.className = "slot-opts";
   options.forEach(([key, text]) => {
     const o = document.createElement("span"); o.className = "opt"; o.tabIndex = 0; o.dataset.key = key;
-    if (text.startsWith("!")) o.innerHTML = '<span class="plain">' + text.slice(1) + "</span>"; else sb(o, text, 1.1);
+    if (text.startsWith("!")) o.innerHTML = '<span class="plain">' + text.slice(1) + "</span>"; else sb(o, text, 1.05);
     const choose = () => { box.querySelectorAll(".opt").forEach((x) => x.classList.remove("on")); o.classList.add("on"); onPick(key); };
     o.onclick = choose; o.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choose(); } };
-    if (preset === key) o.classList.add("on");
     box.appendChild(o);
   });
   container.appendChild(lab); container.appendChild(box);
 }
-const HOLE = "!empty slot <span class=\"hole\"></span>";
 
-/* ---------- shared stepper for levels 1 and 3 ---------- */
-function predictAndStep(L, pair, spec) {
-  sb($(L + "-sb"), keepText(spec));
+/* ---------- predict + step (levels 1, 3, 5) ---------- */
+function predictAndStep(L, pair, sp) {
+  sb($(L + "-sb"), scriptText(sp));
   const albums = $(L + "-albums"); albums.innerHTML = "";
   const mineAlbum = album("mine", 'My stickers: <span class="mono">mine</span>', pair.mine, true);
   albums.appendChild(mineAlbum);
   albums.appendChild(album("theirs", 'Jay\'s stickers: <span class="mono">theirs</span>', pair.theirs, false));
-  const answer = runKeep(spec, pair);
+  const { m, rows } = runScript(sp, pair);
   $(L + "-predict").onclick = () => {
     const guess = [...mineAlbum.querySelectorAll(".sticker.on")].map((s) => s.dataset.name);
-    const ok = sameSet(guess, answer); tried(L);
-    msg($(L + "-predict-msg"), ok ? "good" : "info", ok ? "CORRECT - nice prediction. Step through it to see why." : "Not quite. Step through it to see each answer.");
+    const ok = sameItems(guess, m); tried(L);
+    msg($(L + "-predict-msg"), ok ? "good" : "info", ok ? "CORRECT - nice prediction. Step through it to see why." : "Not quite. Step through it, one pass of the loop at a time.");
     $(L + "-stepper").hidden = false; draw();
   };
   let step = 0;
-  const rows = pair.mine.map((it) => {
-    const has = pair.theirs.includes(it); const ans = spec.not ? !has : has;
-    return { it, has, ans };
-  });
+  const ask = sp.loop === "each" ? "theirs contains item?" : "theirs contains item i of mine?";
   function draw() {
-    let h = `<tr><th>sticker in mine</th><th>what keep asks</th><th>theirs contains it?</th>${spec.not ? "<th>not that</th>" : ""}<th>kept?</th></tr>`;
+    let h = "<tr>" + (sp.loop === "each" ? "<th>item</th>" : "<th>i</th><th>item i of mine</th>") +
+      `<th>${ask}</th>${sp.not ? "<th>not that</th>" : ""}<th>add?</th><th>m after this pass</th></tr>`;
     rows.slice(0, step).forEach((r, k) => {
-      h += `<tr class="${k === step - 1 ? "now" : ""}"><td>${EMOJI[r.it]} ${r.it}</td><td class="mono">${spec.not ? "not (" : ""}theirs contains ${r.it}${spec.not ? ")" : ""}</td>` +
-           `<td class="mono">${r.has}</td>${spec.not ? `<td class="mono"><b>${r.ans}</b></td>` : ""}<td>${r.ans ? "<b>kept</b>" : "dropped"}</td></tr>`;
+      const sticker = sp.loop === "each" ? r.item : r.asked;
+      h += `<tr class="${k === step - 1 ? "now" : ""}">` + (sp.loop === "each" ? `<td>${show(r.item)}</td>` : `<td class="mono">${r.i}</td><td>${show(r.asked)}</td>`) +
+        `<td class="mono">${r.has}</td>${sp.not ? `<td class="mono"><b>${r.ans}</b></td>` : ""}<td>${r.ans ? "<b>add " + sticker + "</b>" : "skip"}</td><td>${showList(r.m)}</td></tr>`;
     });
     $(L + "-table").innerHTML = h;
     mineAlbum.querySelectorAll(".sticker").forEach((s, k) => {
@@ -317,8 +377,8 @@ function predictAndStep(L, pair, spec) {
       if (k === step - 1) s.classList.add("now");
     });
     if (step >= rows.length) {
-      msg($(L + "-msg"), "good", `Keep reports <b>[${answer.map((n) => EMOJI[n] + " " + n).join(", ")}]</b>. ` +
-        (spec.not ? "These are the stickers Jay does not have, so they are the ones you can trade." : "These are the stickers you both have. In the ESP game, these are your matches."));
+      msg($(L + "-msg"), "good", `The script reports <b>${showList(m)}</b>. ` +
+        (sp.not ? "These are the stickers Jay does not have, so they are the ones you can trade." : "These are the stickers you both have. In the ESP game, these are your matches."));
       finish(L);
     } else $(L + "-msg").innerHTML = "";
     $(L + "-next").disabled = step >= rows.length;
@@ -328,184 +388,189 @@ function predictAndStep(L, pair, spec) {
   $(L + "-reset").onclick = () => { step = 0; draw(); };
 }
 
-/* ---------- level 2 and 4 builder ---------- */
-function builder(L, goal, opts) {
-  const spec = { from: null, other: null, item: null, not: opts.allowNot ? null : false };
+/* ---------- builders (levels 2, 4, 6) ---------- */
+const HOLE = (t) => "!" + t;
+function builder(L, loop, allowNot) {
+  const sp = { loop, not: allowNot ? null : false };
   const slots = $(L + "-slots"); slots.innerHTML = "";
-  const draw = () => sb($(L + "-sb"), keepText(spec));
-  if (opts.allowNot) addSlot(slots, "Flip the answer?", [["no", "!no"], ["yes", "<not <>>"]], (k) => { spec.not = k === "yes"; draw(); });
-  addSlot(slots, "Search this list", [["mine", "(mine)"], ["theirs", "(theirs)"]], (k) => { spec.other = k; draw(); });
-  addSlot(slots, "For this", [["empty", HOLE], ["mine", "(mine)"], ["theirs", "(theirs)"]], (k) => { spec.item = k; draw(); });
-  addSlot(slots, "Keep from", [["mine", "(mine)"], ["theirs", "(theirs)"]], (k) => { spec.from = k; draw(); });
-  draw();
-  return spec;
-}
-const GOALS = {
-  both: { text: "Report the stickers that are in BOTH albums.", f: (e) => e.mine.filter((x) => e.theirs.includes(x)), order: false },
-  onlyMine: { text: "Report the stickers that are in mine but NOT in theirs.", f: (e) => e.mine.filter((x) => !e.theirs.includes(x)), order: false },
-  onlyTheirs: { text: "Report the stickers that are in theirs but NOT in mine.", f: (e) => e.theirs.filter((x) => !e.mine.includes(x)), order: false },
-};
-function judge(spec, goalKey, pairs) {
-  if (spec.from === null || spec.other === null || spec.item === null || spec.not === null) return { bad: "Pick something for every spot first." };
-  for (const env of pairs) {
-    const want = GOALS[goalKey].f(env);
-    const got = runKeep(spec, env);
-    if (!sameSet(got, want)) {
-      let why = "";
-      if (spec.item !== "empty") why = `The "for this" spot is the whole list <span class="mono">${spec.item}</span>, not one sticker. A list is never inside the other list, so the answer is the same for every sticker. Use the empty slot so each sticker gets dropped in.`;
-      else if (spec.other === spec.from) why = `You are searching the same list you keep from, so every sticker finds itself. Search the OTHER list.`;
-      else if (goalKey === "both") why = `Both stickers have to be in the other list, so do not flip the answer.`;
-      else why = `Look at which list you keep from, and whether the answer needs to flip.`;
-      return { bad: why, got, want, env };
-    }
+  const draw = () => sb($(L + "-sb"), scriptText(sp));
+  if (allowNot) addSlot(slots, "Flip the answer?", [["no", "!no"], ["yes", "<not <>>"]], (k) => { sp.not = k === "yes"; draw(); });
+  if (loop === "each") {
+    addSlot(slots, "Loop over", [["mine", "(mine)"], ["theirs", "(theirs)"]], (k) => { sp.over = k; draw(); });
+    addSlot(slots, "Search this list", [["mine", "(mine)"], ["theirs", "(theirs)"]], (k) => { sp.search = k; draw(); });
+    addSlot(slots, "Ask if it contains", [["item", "(item)"], ["mine", "(mine)"], ["theirs", "(theirs)"]], (k) => { sp.ask = k; draw(); });
+    addSlot(slots, "Add to m", [["item", "(item)"], ["mine", "(mine)"]], (k) => { sp.add = k; draw(); });
+  } else {
+    addSlot(slots, "Count to the length of", [["mine", "(mine)"], ["theirs", "(theirs)"]], (k) => { sp.bound = k; draw(); });
+    addSlot(slots, "Search this list", [["mine", "(mine)"], ["theirs", "(theirs)"]], (k) => { sp.search = k; draw(); });
+    const vals = [["elem:mine", "(item (i) of (mine))"], ["elem:theirs", "(item (i) of (theirs))"], ["i", "(i)"]];
+    addSlot(slots, "Ask if it contains", vals, (k) => { sp.ask = k; draw(); });
+    addSlot(slots, "Add to m", vals, (k) => { sp.add = k; draw(); });
   }
-  return { ok: true, got: runKeep(spec, pairs[0]) };
+  draw();
+  return sp;
 }
-function showRun(outEl, res, env, goalKey) {
-  const got = runKeep(res.spec, env);
-  const want = GOALS[goalKey].f(env);
+function filled(sp) {
+  const need = sp.loop === "each" ? ["over", "search", "ask", "add"] : ["bound", "search", "ask", "add"];
+  return need.every((k) => sp[k]) && sp.not !== null;
+}
+function diagnose(sp, goalKey) {
+  const src = sp.loop === "each" ? sp.over : null;
+  if (sp.loop === "each") {
+    if (sp.ask !== "item") return `It asks if <span class="mono">${sp.search}</span> contains the whole list <span class="mono">${sp.ask}</span>, not one sticker. A list is never inside the other list, so the answer is the same every pass. Ask about <span class="mono">item</span>.`;
+    if (sp.add !== "item") return `It adds the whole list <span class="mono">${sp.add}</span> to m, not the one sticker. Add <span class="mono">item</span>.`;
+    if (sp.search === src) return `It searches the same list it loops over, so every sticker finds itself. Search the OTHER list.`;
+  } else {
+    if (sp.ask === "i") return `It asks if <span class="mono">${sp.search}</span> contains the number i (1, 2, 3...). There are no numbers in the albums. Ask about <span class="mono">item (i) of</span> a list.`;
+    if (sp.add === "i") return `It adds the number i to m, not the sticker. Add <span class="mono">item (i) of</span> a list.`;
+    const askList = sp.ask.slice(5), addList = sp.add.slice(5);
+    if (askList !== addList) return `It asks about <span class="mono">item i of ${askList}</span> but adds <span class="mono">item i of ${addList}</span>. Those are different stickers. Ask about and add the same thing.`;
+    if (sp.bound !== askList) return `It counts to the length of <span class="mono">${sp.bound}</span> but takes stickers from <span class="mono">${askList}</span>. If the lists are different lengths, it skips stickers or runs past the end (Snap gives a blank). Count to the length of the list you take items from.`;
+    if (sp.search === askList) return `It searches the same list it takes items from, so every sticker finds itself. Search the OTHER list.`;
+  }
+  if (goalKey === "both") return sp.not ? "The not flips the answer, so it keeps the stickers the other list does NOT have. For BOTH, do not flip." : "Check which list you loop through.";
+  return sp.not ? "Check which list you loop through: the stickers come from that list." : "This keeps stickers the other list ALSO has. To keep the ones it does NOT have, flip the answer with not.";
+}
+function judge(sp, goalKey, pairs) {
+  if (!filled(sp)) return { incomplete: true };
+  for (const env of pairs) {
+    const { m } = runScript(sp, env); const want = GOALS[goalKey].f(env);
+    if (!sameItems(m, want)) return { bad: diagnose(sp, goalKey), env };
+  }
+  return { ok: true, env: pairs[0] };
+}
+function runAndShow(L, sp, goalKey, pairs, onOk) {
+  const out = $(L + "-out");
+  const res = judge(sp, goalKey, pairs);
+  if (res.incomplete) { msg(out, "bad", "Pick something for every spot first."); return; }
+  tried(L);
+  const env = res.env; const { m } = runScript(sp, env);
   const a = document.createElement("div"); a.className = "albums";
-  a.appendChild(album("mine", 'mine', env.mine, false));
-  a.appendChild(album("theirs", 'theirs', env.theirs, false));
-  const r = album("result", "Your block reports:", got, false);
-  if (!got.length) r.querySelector(".stickers").innerHTML = '<span class="sub">an empty list</span>';
-  a.appendChild(r);
-  outEl.innerHTML = ""; outEl.appendChild(a);
-  return { got, want };
+  a.appendChild(album("mine", "mine", env.mine, false));
+  a.appendChild(album("theirs", "theirs", env.theirs, false));
+  a.appendChild(album("result", "Your script reports:", m, false));
+  out.innerHTML = ""; out.appendChild(a);
+  const d = document.createElement("div"); out.appendChild(d);
+  if (res.ok) onOk(d); else msg(d, "bad", "NOT QUITE - " + res.bad);
 }
 
-/* LEVEL 2 */
-let l2Spec, l2Pairs;
-function l2Init() {
-  l2Pairs = [makePair(6, 6, 3), makePair(5, 7, 2)];
-  l2Spec = builder("l2", "both", { allowNot: false });
-}
-$("l2-run").onclick = () => {
-  const res = judge(l2Spec, "both", l2Pairs); const out = $("l2-out");
-  if (res.bad && !res.env) { msg(out, "bad", res.bad); return; }
-  tried("l2");
-  showRun(out, { spec: l2Spec }, res.env || l2Pairs[0], "both");
-  const m = document.createElement("div"); out.appendChild(m);
-  if (res.ok) {
-    msg(m, "good", "CORRECT - it works on both pairs of albums. " +
-      (l2Spec.from === "theirs" ? "You kept from theirs, which also works: same stickers, in Jay's order." : "This is the matches block from the ESP game."));
-    finish("l2");
-  } else msg(m, "bad", "NOT QUITE - " + res.bad);
-};
+let l2Sp, l2Pairs, l4Sp, l4Pairs;
+function l2Init() { l2Pairs = [makePair(6, 6, 3), makePair(5, 7, 2)]; l2Sp = builder("l2", "each", false); }
+function l4Init() { l4Pairs = [makePair(6, 6, 3), makePair(7, 5, 2)]; l4Sp = builder("l4", "i", false); }
+$("l2-run").onclick = () => runAndShow("l2", l2Sp, "both", l2Pairs, (d) => {
+  msg(d, "good", "CORRECT - it works on both pairs of albums. " + (l2Sp.over === "theirs" ? "You looped over theirs, which also works: same stickers, in Jay's order." : "This is the matches block from the ESP game."));
+  finish("l2");
+});
+$("l4-run").onclick = () => runAndShow("l4", l4Sp, "both", l4Pairs, (d) => {
+  msg(d, "good", "CORRECT - it works on both pairs, even though the albums are different lengths."); finish("l4");
+});
 
-/* LEVEL 4 */
-let l4Spec, l4Goal, l4Pairs;
-function l4New() {
-  const order = ["onlyMine", "onlyTheirs", "both", "onlyMine", "onlyTheirs"];
-  l4Goal = S.done.l4 ? pick(Object.keys(GOALS)) : order[S.l4 % order.length];
-  l4Pairs = [makePair(6, 6, 3), makePair(6, 5, 2)];
-  $("l4-goal").textContent = "Goal: " + GOALS[l4Goal].text;
-  l4Spec = builder("l4", l4Goal, { allowNot: true });
-  $("l4-out").innerHTML = "";
+/* LEVEL 6 */
+let l6Sp, l6Goal, l6Pairs;
+function l6New() {
+  const order = [["onlyMine", "each"], ["onlyTheirs", "i"], ["both", "each"], ["onlyMine", "i"], ["onlyTheirs", "each"], ["both", "i"]];
+  const [g, loop] = S.done.l6 ? [pick(Object.keys(GOALS)), pick(["each", "i"])] : order[S.l6 % order.length];
+  l6Goal = g; l6Pairs = [makePair(6, 6, 3), makePair(6, 5, 2)];
+  $("l6-goal").textContent = "Goal: " + GOALS[g].text + " Use " + (loop === "each" ? "for each." : "for i.");
+  l6Sp = builder("l6", loop, true); $("l6-out").innerHTML = "";
 }
-$("l4-run").onclick = () => {
-  const res = judge(l4Spec, l4Goal, l4Pairs); const out = $("l4-out");
-  if (res.bad && !res.env) { msg(out, "bad", res.bad); return; }
-  tried("l4");
-  showRun(out, { spec: l4Spec }, res.env || l4Pairs[0], l4Goal);
-  const m = document.createElement("div"); out.appendChild(m);
-  if (res.ok) {
-    S.l4 = Math.min(3, S.l4 + 1); save(); if (S.l4 >= 3) finish("l4"); status();
-    msg(m, "good", "CORRECT - it works on both pairs. " + (S.l4 < 3 ? '<button id="l4-again">Next goal</button>' : "Level done."));
-    const b = $("l4-again"); if (b) b.onclick = l4New;
-  } else msg(m, "bad", "NOT QUITE - " + res.bad);
-};
+$("l6-run").onclick = () => runAndShow("l6", l6Sp, l6Goal, l6Pairs, (d) => {
+  S.l6 = Math.min(3, S.l6 + 1); save(); if (S.l6 >= 3) finish("l6"); status();
+  msg(d, "good", "CORRECT - it works on both pairs. " + (S.l6 < 3 ? '<button id="l6-again">Next goal</button>' : "Level done. <button id=\"l6-again\">Keep practicing</button>"));
+  $("l6-again").onclick = l6New;
+});
 
-/* LEVEL 5 */
-const L5_SPECS = [
-  { from: "mine", other: "theirs", item: "empty", not: false },
-  { from: "mine", other: "theirs", item: "empty", not: true },
-  { from: "theirs", other: "mine", item: "empty", not: false },
-  { from: "theirs", other: "mine", item: "empty", not: true },
-];
-let l5;
-function l5New() {
-  const spec = pick(L5_SPECS.filter((s) => !l5 || s !== l5.spec));
-  const pair = makePair(5, 5, pick([2, 3]));
-  l5 = { spec, pair, answer: runKeep(spec, pair) };
-  sb($("l5-sb"), keepText(spec));
-  const a = $("l5-albums"); a.innerHTML = "";
+/* LEVEL 7 */
+function correctSpecs() {
+  const out = [];
+  for (const loop of ["each", "i"]) for (const from of ["mine", "theirs"]) for (const not of [false, true]) {
+    const other = from === "mine" ? "theirs" : "mine";
+    out.push(loop === "each" ? { loop, over: from, search: other, ask: "item", add: "item", not } : { loop, bound: from, search: other, ask: "elem:" + from, add: "elem:" + from, not });
+  }
+  return out;
+}
+let l7;
+function l7New() {
+  const sp = pick(correctSpecs()); const pair = makePair(5, 5, pick([2, 3]));
+  l7 = { sp, pair, answer: runScript(sp, pair).m, from: sp.loop === "each" ? sp.over : sp.bound };
+  sb($("l7-sb"), scriptText(sp));
+  const a = $("l7-albums"); a.innerHTML = "";
   a.appendChild(album("mine", '<span class="mono">mine</span>', pair.mine, true));
   a.appendChild(album("theirs", '<span class="mono">theirs</span>', pair.theirs, true));
 }
-$("l5-check").onclick = () => {
-  const picked = [...$("l5-albums").querySelectorAll(".sticker.on")];
+$("l7-check").onclick = () => {
+  const picked = [...$("l7-albums").querySelectorAll(".sticker.on")];
+  const fromAlbum = $("l7-albums").children[l7.from === "mine" ? 0 : 1];
+  tried("l7");
   const names = picked.map((p) => p.dataset.name);
-  const fromAlbum = $("l5-albums").children[l5.spec.from === "mine" ? 0 : 1];
-  const uniq = [...new Set(names)];
-  tried("l5");
   const fromRight = picked.every((p) => fromAlbum.contains(p));
-  const ok = fromRight && sameSet(uniq, l5.answer) && names.length === uniq.length;
-  $("l5-albums").querySelectorAll(".sticker").forEach((s) => {
-    const inAns = l5.answer.includes(s.dataset.name) && fromAlbum.contains(s);
-    if (inAns) s.classList.add(s.classList.contains("on") ? "found" : "missed");
+  const ok = fromRight && sameItems(names, l7.answer);
+  $("l7-albums").querySelectorAll(".sticker").forEach((s) => {
+    if (l7.answer.includes(s.dataset.name) && fromAlbum.contains(s)) s.classList.add(s.classList.contains("on") ? "found" : "missed");
   });
   if (ok) {
-    S.l5 = Math.min(4, S.l5 + 1); save(); if (S.l5 >= 4) finish("l5"); status();
-    msg($("l5-msg"), "good", "CORRECT - " + (S.l5 < 4 ? '<button id="l5-again">Next one</button>' : "Level done. <button id=\"l5-again\">Keep practicing</button>"));
+    S.l7 = Math.min(4, S.l7 + 1); save(); if (S.l7 >= 4) finish("l7"); status();
+    msg($("l7-msg"), "good", "CORRECT - " + (S.l7 < 4 ? '<button id="l7-again">Next one</button>' : 'Level done. <button id="l7-again">Keep practicing</button>'));
   } else {
-    let why = `It reports [${l5.answer.join(", ") || "nothing"}].`;
-    if (!fromRight) why += ` Keep only reports stickers from the list after <b>from</b>, which is <span class="mono">${l5.spec.from}</span>, so click in that album.`;
-    else if (l5.spec.not) why += " The not flips each answer, so it keeps the stickers the other list does NOT have.";
-    else why += " It keeps the stickers the other list also has.";
-    msg($("l5-msg"), "bad", "NOT QUITE - " + why + ' The green outlines are the right ones. <button id="l5-again">Try a new one</button>');
+    let why = `It reports ${showList(l7.answer)}.`;
+    if (!fromRight) why += ` The stickers come from the list the loop goes through, which is <span class="mono">${l7.from}</span>, so click in that album.`;
+    else if (l7.sp.not) why += " The not flips each answer, so it adds the stickers the other list does NOT have.";
+    else why += " It adds the stickers the other list also has.";
+    msg($("l7-msg"), "bad", "NOT QUITE - " + why + ' The green outlines are the right ones. <button id="l7-again">Try a new one</button>');
   }
-  $("l5-again").onclick = () => { $("l5-msg").innerHTML = ""; l5New(); };
+  $("l7-again").onclick = () => { $("l7-msg").innerHTML = ""; l7New(); };
 };
 
-/* LEVEL 6 */
-const L6 = [
+/* LEVEL 8 */
+const L8 = [
   { q: "Which songs are on BOTH your playlist and your friend's playlist?", a: "my songs", b: "friend's songs", goal: "both" },
   { q: "Which kids signed up for the field trip but have NOT turned in a permission slip?", a: "signed up", b: "slips in", goal: "onlyA" },
   { q: "Which of your guesses are on the secret word list?", a: "my guesses", b: "secret words", goal: "both" },
   { q: "Which groceries on the shopping list are NOT already in the fridge?", a: "shopping list", b: "fridge", goal: "onlyA" },
   { q: "Which classes do you and your best friend BOTH have?", a: "my classes", b: "their classes", goal: "both" },
-  { q: "Which assignments are you still missing? (all assignments that are NOT in the turned-in list)", a: "assignments", b: "turned in", goal: "onlyA" },
+  { q: "Which assignments are you still missing? (assignments that are NOT in the turned-in list)", a: "assignments", b: "turned in", goal: "onlyA" },
   { q: "Which players were on the team last year AND are on it again this year?", a: "last year", b: "this year", goal: "both" },
   { q: "Which words in the essay are NOT in the dictionary? (likely typos)", a: "essay words", b: "dictionary", goal: "onlyA" },
 ];
-let l6;
-function l6New() {
-  const s = pick(L6.filter((x) => !l6 || x !== l6.s));
-  const names = { a: s.a, b: s.b };
+const L8_WHY = {
+  both: "This adds the items that the other list ALSO has: the ones in both.",
+  onlyA: "The not flips the answer, so this adds the items the other list does NOT have.",
+  sameList: "This searches the same list it loops over, so every item finds itself and everything gets added.",
+  wholeList: "This adds the whole list to m every time, not the one item.",
+};
+let l8;
+function l8New() {
+  const s = pick(L8.filter((x) => !l8 || x !== l8.s));
+  const n = { a: s.a, b: s.b };
+  const loop = pick(["each", "i"]);
+  const mk = (over, search, not, addWhole) => loop === "each"
+    ? { loop, over, search, ask: "item", add: addWhole ? over : "item", not }
+    : { loop, bound: over, search, ask: "elem:" + over, add: addWhole ? over : "elem:" + over, not };
   const opts = shuffle([
-    { key: "both", spec: { from: "a", other: "b", item: "empty", not: false } },
-    { key: "onlyA", spec: { from: "a", other: "b", item: "empty", not: true } },
-    { key: "wrongList", spec: { from: "a", other: "a", item: "empty", not: false } },
-    { key: "wholeList", spec: { from: "a", other: "b", item: "a", not: false } },
+    { key: "both", sp: mk("a", "b", false) }, { key: "onlyA", sp: mk("a", "b", true) },
+    { key: "sameList", sp: mk("a", "a", false) }, { key: "wholeList", sp: mk("a", "b", s.goal === "onlyA", true) },
   ]);
-  l6 = { s, opts, chosen: null };
-  $("l6-goal").textContent = s.q;
-  const c = $("l6-choices"); c.innerHTML = ""; $("l6-msg").innerHTML = "";
+  l8 = { s, opts, chosen: null };
+  $("l8-goal").textContent = s.q;
+  const c = $("l8-choices"); c.innerHTML = ""; $("l8-msg").innerHTML = "";
   opts.forEach((o, i) => {
     const d = document.createElement("div"); d.className = "opt"; d.tabIndex = 0;
     d.innerHTML = `<span class="letter">${"ABCD"[i]}</span><span class="b"></span>`;
-    sb(d.querySelector(".b"), keepText(o.spec, { a: s.a, b: s.b }), 1.1);
-    const choose = () => { c.querySelectorAll(".opt").forEach((x) => x.classList.remove("on")); d.classList.add("on"); l6.chosen = o; };
+    sb(d.querySelector(".b"), scriptText(o.sp, n), 0.95);
+    const choose = () => { c.querySelectorAll(".opt").forEach((x) => x.classList.remove("on")); d.classList.add("on"); l8.chosen = o; };
     d.onclick = choose; d.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choose(); } };
     c.appendChild(d);
   });
 }
-const L6_WHY = {
-  both: "This keeps the items that the other list ALSO has: the ones in both.",
-  onlyA: "The not flips the answer, so this keeps the items the other list does NOT have.",
-  wrongList: "This searches the same list it keeps from, so every item finds itself and nothing is dropped.",
-  wholeList: "This asks about the whole list instead of one item (no empty slot), so it gives the same answer for every item.",
-};
-$("l6-check").onclick = () => {
-  if (!l6.chosen) { msg($("l6-msg"), "bad", "Pick one of the blocks first."); return; }
-  tried("l6");
-  const ok = l6.chosen.key === l6.s.goal;
+$("l8-check").onclick = () => {
+  if (!l8.chosen) { msg($("l8-msg"), "bad", "Pick one of the scripts first."); return; }
+  tried("l8");
+  const ok = l8.chosen.key === l8.s.goal;
   if (ok) {
-    S.l6 = Math.min(4, S.l6 + 1); save(); if (S.l6 >= 4) finish("l6"); status();
-    msg($("l6-msg"), "good", "CORRECT - " + L6_WHY[l6.chosen.key] + ' <button id="l6-again">' + (S.l6 < 4 ? "Next one" : "Keep practicing") + "</button>");
-  } else msg($("l6-msg"), "bad", "NOT QUITE - " + L6_WHY[l6.chosen.key] + ' <button id="l6-again">Try a new one</button>');
-  $("l6-again").onclick = l6New;
+    S.l8 = Math.min(4, S.l8 + 1); save(); if (S.l8 >= 4) finish("l8"); status();
+    msg($("l8-msg"), "good", "CORRECT - " + L8_WHY[l8.chosen.key] + ' <button id="l8-again">' + (S.l8 < 4 ? "Next one" : "Keep practicing") + "</button>");
+  } else msg($("l8-msg"), "bad", "NOT QUITE - " + L8_WHY[l8.chosen.key] + ' <button id="l8-again">Try a new one</button>');
+  $("l8-again").onclick = l8New;
 };
 
 /* ---------- summary ---------- */
@@ -515,7 +580,7 @@ function renderSummary() {
   let h = "<tr><th>Level</th><th>Done?</th><th>Tries</th></tr>";
   Object.keys(LEVELS).forEach((l) => { h += `<tr><td>${LEVELS[l]}</td><td>${S.done[l] ? "✔ done" : "not yet"}</td><td>${S.tries[l] || 0}</td></tr>`; });
   const n = Object.keys(LEVELS).filter((l) => S.done[l]).length;
-  $("sum-table").innerHTML = h + `<tr><th>Total</th><th>${n} / 6 levels</th><th></th></tr>`;
+  $("sum-table").innerHTML = h + `<tr><th>Total</th><th>${n} / 8 levels</th><th></th></tr>`;
   $("sum-time").textContent = "As of " + new Date().toLocaleString();
 }
 $("who-name").value = S.name; $("who-period").value = S.period;
@@ -526,49 +591,54 @@ setInterval(renderSummary, 30000);
 
 /* ---------- start ---------- */
 const L1_PAIR = { mine: ["cat", "octopus", "pizza", "rocket", "ghost", "frog"], theirs: ["rocket", "dog", "cat", "taco", "frog", "star"] };
-const L3_PAIR = { mine: ["unicorn", "donut", "whale", "alien", "panda", "star"], theirs: ["star", "robot", "donut", "dragon", "panda", "cactus"] };
+const L3_PAIR = { mine: ["robot", "taco", "rainbow", "dragon", "cat"], theirs: ["cat", "whale", "taco", "pizza", "ghost", "dragon", "frog"] };
+const L5_PAIR = { mine: ["unicorn", "donut", "whale", "alien", "panda", "star"], theirs: ["star", "robot", "donut", "dragon", "panda", "cactus"] };
 sb($("intro-lists"), `set [mine v] to ${sbList(L1_PAIR.mine)}\nset [theirs v] to ${sbList(L1_PAIR.theirs)}`);
-predictAndStep("l1", L1_PAIR, { from: "mine", other: "theirs", item: "empty", not: false });
-predictAndStep("l3", L3_PAIR, { from: "mine", other: "theirs", item: "empty", not: true });
-l2Init(); l4New(); l5New(); l6New();
+predictAndStep("l1", L1_PAIR, { loop: "each", over: "mine", search: "theirs", ask: "item", add: "item", not: false });
+predictAndStep("l3", L3_PAIR, { loop: "i", bound: "mine", search: "theirs", ask: "elem:mine", add: "elem:mine", not: false });
+predictAndStep("l5", L5_PAIR, { loop: "each", over: "mine", search: "theirs", ask: "item", add: "item", not: true });
+l2Init(); l4Init(); l6New(); l7New(); l8New();
 status(); renderSummary();
 
 /* ---------- self test (?selftest) ---------- */
 if (location.search.includes("selftest")) {
   const R = []; const eq = (n, a, b) => R.push((JSON.stringify(a) === JSON.stringify(b) ? "PASS " : "FAIL ") + n + " got " + JSON.stringify(a) + " want " + JSON.stringify(b));
   try { localStorage.removeItem(KEY); } catch (e) {}
-  S = { name: "T", period: "1", done: {}, l4: 0, l5: 0, l6: 0, tries: {} };
-  eq("both", runKeep({ from: "mine", other: "theirs", item: "empty", not: false }, L1_PAIR), ["cat", "rocket", "frog"]);
-  eq("only mine", runKeep({ from: "mine", other: "theirs", item: "empty", not: true }, L3_PAIR), ["unicorn", "whale", "alien"]);
-  eq("whole list keeps nothing", runKeep({ from: "mine", other: "theirs", item: "mine", not: false }, L1_PAIR), []);
-  eq("same list keeps all", runKeep({ from: "mine", other: "mine", item: "empty", not: false }, L1_PAIR), L1_PAIR.mine);
-  const p = makePair(6, 5, 2); eq("makePair overlap", [p.mine.length, p.theirs.length, p.mine.filter((x) => p.theirs.includes(x)).length], [6, 5, 2]);
-  // level 1 + 3 by clicking
-  ["l1", "l3"].forEach((L) => { $(L + "-predict").click(); $(L + "-all").click(); });
-  eq("l1 l3 done", [!!S.done.l1, !!S.done.l3], [true, true]);
-  // level 2 via slots: search theirs, empty, keep from mine
+  S = { name: "T", period: "1", done: {}, l6: 0, l7: 0, l8: 0, tries: {} };
+  const E = (o) => Object.assign({ loop: "each", over: "mine", search: "theirs", ask: "item", add: "item", not: false }, o);
+  const I = (o) => Object.assign({ loop: "i", bound: "mine", search: "theirs", ask: "elem:mine", add: "elem:mine", not: false }, o);
+  eq("each both", runScript(E({}), L1_PAIR).m, ["cat", "rocket", "frog"]);
+  eq("each not", runScript(E({ not: true }), L5_PAIR).m, ["unicorn", "whale", "alien"]);
+  eq("i both", runScript(I({}), L3_PAIR).m, ["taco", "dragon", "cat"]);
+  eq("i adds numbers", runScript(I({ add: "i" }), L3_PAIR).m, [2, 4, 5]);
+  eq("i asks numbers", runScript(I({ ask: "i" }), L3_PAIR).m, []);
+  eq("i long bound gives blanks", runScript(I({ bound: "theirs", not: true }), L3_PAIR).m.filter((x) => x === "").length, 2);
+  eq("each whole list asks", runScript(E({ ask: "mine" }), L1_PAIR).m, []);
+  eq("diagnose bound", diagnose(I({ bound: "theirs" }), "both").includes("Count to the length"), true);
+  eq("diagnose i add", diagnose(I({ add: "i" }), "both").includes("number i"), true);
+  ["l1", "l3", "l5"].forEach((L) => { $(L + "-predict").click(); $(L + "-all").click(); });
+  eq("l1 l3 l5 done", [!!S.done.l1, !!S.done.l3, !!S.done.l5], [true, true, true]);
   const pickOpt = (L, row, key) => [...$(L + "-slots").querySelectorAll(".slot-opts")[row].children].find((o) => o.dataset.key === key).click();
-  pickOpt("l2", 0, "theirs"); pickOpt("l2", 1, "mine"); pickOpt("l2", 2, "mine"); $("l2-run").click();
-  eq("l2 whole-list wrong", !!S.done.l2, false);
-  pickOpt("l2", 1, "empty"); $("l2-run").click(); eq("l2 done", !!S.done.l2, true);
-  // level 4: three goals
-  for (let i = 0; i < 3; i++) {
-    const g = l4Goal; const sp = g === "both" ? ["no", "theirs", "empty", "mine"] : g === "onlyMine" ? ["yes", "theirs", "empty", "mine"] : ["yes", "mine", "empty", "theirs"];
-    sp.forEach((k, r) => pickOpt("l4", r, k)); $("l4-run").click(); const b = $("l4-again"); if (b) b.click();
+  ["mine", "theirs", "mine", "item"].forEach((k, r) => pickOpt("l2", r, k)); $("l2-run").click(); eq("l2 whole-list wrong", !!S.done.l2, false);
+  pickOpt("l2", 2, "item"); $("l2-run").click(); eq("l2 done", !!S.done.l2, true);
+  ["mine", "theirs", "elem:mine", "i"].forEach((k, r) => pickOpt("l4", r, k)); $("l4-run").click(); eq("l4 add-i wrong", !!S.done.l4, false);
+  pickOpt("l4", 3, "elem:mine"); $("l4-run").click(); eq("l4 done", !!S.done.l4, true);
+  for (let k = 0; k < 3; k++) {
+    const g = l6Goal, loop = l6Sp.loop; const from = g === "onlyTheirs" ? "theirs" : "mine", other = from === "mine" ? "theirs" : "mine";
+    const keys = [g === "both" ? "no" : "yes", from, other, loop === "each" ? "item" : "elem:" + from, loop === "each" ? "item" : "elem:" + from];
+    keys.forEach((key, r) => pickOpt("l6", r, key)); $("l6-run").click(); $("l6-again").click();
   }
-  eq("l4 done", [S.l4, !!S.done.l4], [3, true]);
-  // level 5: four right
-  for (let i = 0; i < 4; i++) {
-    const fromAlbum = $("l5-albums").children[l5.spec.from === "mine" ? 0 : 1];
-    fromAlbum.querySelectorAll(".sticker").forEach((s) => { if (l5.answer.includes(s.dataset.name)) s.click(); });
-    $("l5-check").click(); $("l5-again").click();
+  eq("l6 done", [S.l6, !!S.done.l6], [3, true]);
+  for (let k = 0; k < 4; k++) {
+    const fromAlbum = $("l7-albums").children[l7.from === "mine" ? 0 : 1];
+    fromAlbum.querySelectorAll(".sticker").forEach((s) => { if (l7.answer.includes(s.dataset.name)) s.click(); });
+    $("l7-check").click(); $("l7-again").click();
   }
-  eq("l5 done", [S.l5, !!S.done.l5], [4, true]);
-  // level 6: one wrong, then four right
-  l6.chosen = l6.opts.find((o) => o.key === "wrongList"); $("l6-check").click(); eq("l6 wrong no credit", S.l6, 0); $("l6-again").click();
-  for (let i = 0; i < 4; i++) { l6.chosen = l6.opts.find((o) => o.key === l6.s.goal); $("l6-check").click(); $("l6-again").click(); }
-  eq("l6 done", [S.l6, !!S.done.l6], [4, true]);
-  eq("summary", $("sum-table").textContent.includes("6 / 6 levels"), true);
+  eq("l7 done", [S.l7, !!S.done.l7], [4, true]);
+  l8.chosen = l8.opts.find((o) => o.key === "sameList"); $("l8-check").click(); eq("l8 wrong no credit", S.l8, 0); $("l8-again").click();
+  for (let k = 0; k < 4; k++) { l8.chosen = l8.opts.find((o) => o.key === l8.s.goal); $("l8-check").click(); $("l8-again").click(); }
+  eq("l8 done", [S.l8, !!S.done.l8], [4, true]);
+  eq("summary", $("sum-table").textContent.includes("8 / 8 levels"), true);
   document.title = "SELFTEST " + (R.every((r) => r.startsWith("PASS")) ? "ALL PASS" : "FAILURES");
   const pre = document.createElement("pre"); pre.id = "selftest"; pre.textContent = R.join("\n"); document.body.prepend(pre);
 }
