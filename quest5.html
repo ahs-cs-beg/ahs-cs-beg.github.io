@@ -211,6 +211,7 @@ summary { cursor: pointer; color: var(--accent); }
     <h3>a) A new buggy block. Which two things are wrong? <span class="pts" id="pts-p4a"></span></h3>
     <p class="sub" id="p4-goal"></p>
     <div class="blocks-wrap" id="p4-earn-sb"></div>
+    <p style="margin:6px 0"><b>Check exactly two boxes</b>: the two mistakes you would fix.</p>
     <div class="checklist" id="p4-bugs"></div>
     <button id="p4a-check" class="primary">Check</button>
     <div id="p4a-msg"></div>
@@ -647,7 +648,7 @@ $("p4a-check").onclick = () => {
   if (S.done.p4a) { msg(out, "good", "CORRECT - you already earned this point."); return; }
   const labels = [...$("p4-bugs").children];
   const checked = labels.filter((l) => l.querySelector("input").checked);
-  if (checked.length !== 2) { msg(out, "bad", "Pick exactly two."); return; }
+  if (checked.length !== 2) { msg(out, "bad", "Check exactly two boxes, one for each mistake."); return; }
   const ok = checked.every((l) => l.dataset.ok);
   attempt("p4a", ok);
   if (ok) msg(out, "good", "CORRECT - both mistakes are inside the keep test. Now fix it below.");
