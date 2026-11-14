@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quest 5 Make-Up</title>
+<style>
+:root {
+  --bg: #f4f5f7; --card: #ffffff; --ink: #1d2330; --muted: #5b6475; --line: #d9dde5;
+  --accent: #2f6fdb; --good: #1f8a4c; --good-bg: #e6f5ec; --bad: #b3261e; --bad-bg: #fdecea;
+  --chip: #eef1f6; --chip-on: #2f6fdb;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+header { background: #1d2330; color: #fff; padding: 18px 16px; }
+header h1 { margin: 0; font-size: 1.5rem; }
+header p { margin: 4px 0 0; color: #c9cfdb; }
+main { max-width: 960px; margin: 0 auto; padding: 16px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 0 0 18px; }
+.card h2 { margin: 0 0 4px; font-size: 1.25rem; }
+.card h3 { margin: 18px 0 6px; font-size: 1.05rem; }
+.pts { float: right; font-size: .9rem; color: var(--muted); font-weight: 600; }
+.pts.done { color: var(--good); }
+.sub { color: var(--muted); margin: 0 0 10px; }
+.tag { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 999px; margin-right: 6px; }
+.tag.learn { background: #e8eefc; color: #2f4f9b; }
+.tag.earn { background: #fff1d6; color: #8a5a00; }
+.learn-box { border-left: 4px solid #8fa9e8; padding: 4px 0 4px 14px; margin: 12px 0; }
+.earn-box { border-left: 4px solid #f0b54a; padding: 4px 0 4px 14px; margin: 12px 0; }
+.blocks-wrap { overflow-x: auto; padding: 6px 0; }
+.row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+button { font: inherit; border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 7px 14px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+button:disabled { opacity: .5; cursor: default; }
+input[type=text] { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; min-width: 220px; }
+table.trace { border-collapse: collapse; margin: 8px 0; font-size: .95rem; }
+table.trace th, table.trace td { border: 1px solid var(--line); padding: 4px 10px; text-align: center; }
+table.trace th { background: #f0f2f6; }
+table.trace tr.now td { background: #fff7d6; }
+table.trace td.mono, .mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.chip { background: var(--chip); border: 2px solid transparent; border-radius: 999px; padding: 5px 14px; cursor: pointer;
+  font-family: ui-monospace, Menlo, Consolas, monospace; }
+.chip.on { background: var(--chip-on); color: #fff; }
+.chip.right { border-color: var(--good); background: var(--good-bg); color: var(--ink); }
+.chip.wrong { border-color: var(--bad); background: var(--bad-bg); color: var(--ink); }
+.msg { margin: 10px 0 0; padding: 8px 12px; border-radius: 8px; }
+.msg.good { background: var(--good-bg); color: #13502d; }
+.msg.bad { background: var(--bad-bg); color: #7a1a14; }
+.msg.info { background: #eef1f6; }
+.slots { display: grid; grid-template-columns: max-content 1fr; gap: 8px 12px; align-items: center; margin: 10px 0; }
+.slots label { font-weight: 600; }
+.slot-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.slot-opts .opt { cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 2px; background: #f6f7fa; }
+.slot-opts .opt.on { border-color: var(--accent); background: #e8eefc; }
+.slot-opts .plain { display: inline-block; padding: 6px 10px; font-family: ui-monospace, Menlo, Consolas, monospace; }
+.slot-opts .plain .hole { display: inline-block; width: 26px; height: 16px; border-radius: 9px; background: #fff; border: 1px solid #999; vertical-align: middle; }
+.scenario { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; margin: 8px 0; }
+.scenario .q { margin: 0 0 6px; }
+.scenario .btns { display: flex; gap: 8px; }
+.checklist label { display: block; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.checklist label:hover { background: #f4f6fa; }
+#summary { border: 3px solid var(--ink); }
+#summary table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+#summary td, #summary th { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; }
+#summary .total { font-size: 1.4rem; font-weight: 700; }
+.who { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--accent); }
+@media (max-width: 600px) { .slots { grid-template-columns: 1fr; } input[type=text] { min-width: 0; width: 100%; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Quest 5 Make-Up: Map, Keep, Combine</h1>
+  <p>Work through every problem from the quest. Learn it on the test's own code, then earn the points back on a new version.</p>
+</header>
+<main>
+
+<div class="card">
+  <div class="who">
+    <label>Name <input type="text" id="who-name" autocomplete="off"></label>
+    <label>Period <input type="text" id="who-period" autocomplete="off" style="min-width:70px;width:70px"></label>
+  </div>
+  <p class="sub" style="margin-top:10px">Each problem has two parts.
+    <span class="tag learn">Learn</span> walks through the exact block from the quest. No points, take your time.
+    <span class="tag earn">Earn</span> gives you a new version of the same problem. Get it right to earn the points back.
+    A wrong answer gives you a fresh version to try, so you can keep going. Your progress is saved in this browser.
+    When you finish, screenshot the box at the bottom and turn it in.</p>
+</div>
+
+<!-- ============ PROBLEM 1 ============ -->
+<div class="card" id="p1">
+  <span class="pts" id="pts-p1"></span>
+  <h2>1. Tracing a loop (mys word)</h2>
+  <p class="sub">Quest Section 1, parts a and b. 2 points.</p>
+  <div class="blocks-wrap" data-sb="mysWordDef"></div>
+
+  <div class="learn-box">
+    <span class="tag learn">Learn</span> Step through <span class="mono">mys word: (catapult)</span> one pass of the loop at a time.
+    Watch <b>new word</b>. Notice there are <b>two</b> set blocks: the one inside the <b>if</b> only runs for some letters, the one after it runs <b>every</b> time.
+    <div style="margin:10px 0" class="row">
+      <label>Word: <input type="text" id="p1-learn-word" value="catapult" style="min-width:140px;width:140px"></label>
+      <button id="p1-next" class="primary">Next step</button>
+      <button id="p1-all">Show all</button>
+      <button id="p1-reset">Start over</button>
+    </div>
+    <table class="trace" id="p1-table"></table>
+    <div id="p1-learn-msg"></div>
+  </div>
+
+  <div class="earn-box">
+    <span class="tag earn">Earn</span>
+    <h3>a) What does <span class="mono" id="p1a-call"></span> report? <span class="pts" id="pts-p1a"></span></h3>
+    <div class="blocks-wrap" id="p1a-sb"></div>
+    <input type="text" id="p1a-ans" autocomplete="off" spellcheck="false"> <button id="p1a-check" class="primary">Check</button>
+    <div id="p1a-msg"></div>
+    <h3>b) What does <span class="mono" id="p1b-call"></span> report? <span class="pts" id="pts-p1b"></span></h3>
+    <p class="sub">Note: "y" is not a vowel here.</p>
+    <div class="blocks-wrap" id="p1b-sb"></div>
+    <input type="text" id="p1b-ans" autocomplete="off" spellcheck="false"> <button id="p1b-check" class="primary">Check</button>
+    <div id="p1b-msg"></div>
+  </div>
+</div>
+
+<!-- ============ PROBLEM 2 ============ -->
+<div class="card" id="p2">
+  <span class="pts" id="pts-p2"></span>
+  <h2>2. What does keep report? (mys: words)</h2>
+  <p class="sub">Quest Section 1, the list question. 1 point.</p>
+  <div class="blocks-wrap" id="p2-learn-def"></div>
+  <div class="learn-box">
+    <span class="tag learn">Learn</span> Keep asks the question in the ring about <b>each word, one at a time</b>.
+    The empty slots are where each word goes. If the answer is <b>true</b>, the word stays. If it is <b>false</b>, it is dropped.
+    <b>or</b> is true if <i>either</i> side is true. For each word below, decide: keep or drop?
+    <div class="blocks-wrap" id="p2-learn-call"></div>
+    <table class="trace" id="p2-table"></table>
+    <div id="p2-learn-msg"></div>
+  </div>
+  <div class="earn-box">
+    <span class="tag earn">Earn</span> Here is a new version. Click the words this call reports, then check.
+    <div class="blocks-wrap" id="p2-earn-def"></div>
+    <div class="blocks-wrap" id="p2-earn-call"></div>
+    <div class="chips" id="p2-chips"></div>
+    <button id="p2-check" class="primary">Check</button>
+    <div id="p2-msg"></div>
+  </div>
+</div>
+
+<!-- ============ PROBLEM 3 ============ -->
+<div class="card" id="p3">
+  <span class="pts" id="pts-p3"></span>
+  <h2>3. Map or Keep?</h2>
+  <p class="sub">Quest Section 1, the last two questions. 2 points.</p>
+  <div class="learn-box">
+    <span class="tag learn">Learn</span>
+    <p style="margin:6px 0"><b>Keep</b> gives you back <b>some</b> of the items, <b>unchanged</b>. You use it when the question says "find all the ... that ...".<br>
+    <b>Map</b> gives you back <b>every</b> item, <b>changed</b>. You use it when the question says "do something to every ...".</p>
+    <div class="row">
+      <div class="blocks-wrap" data-sb="keepExample"></div>
+      <div class="blocks-wrap" data-sb="mapExample"></div>
+    </div>
+    <p style="margin:6px 0">Practice sorting these. No points here.</p>
+    <div id="p3-learn"></div>
+  </div>
+  <div class="earn-box">
+    <span class="tag earn">Earn</span> Two new questions, 1 point each.
+    <div id="p3-earn"></div>
+  </div>
+</div>
+
+<!-- ============ PROBLEM 4 ============ -->
+<div class="card" id="p4">
+  <span class="pts" id="pts-p4"></span>
+  <h2>4. Debug and fix</h2>
+  <p class="sub">Quest Section 2. 2 points.</p>
+  <div class="learn-box">
+    <span class="tag learn">Learn</span> This block SHOULD report the sum of the odd numbers in <span class="mono">nums</span>. It has two mistakes.
+    <div class="blocks-wrap" data-sb="p4Buggy"></div>
+    <p style="margin:6px 0">Two things to know:</p>
+    <ul style="margin:0 0 6px">
+      <li>Inside the keep ring, the <b>empty slot</b> is where each item goes, one at a time. Putting <span class="mono">nums</span> there hands keep the <b>whole list</b> every time, not one number.</li>
+      <li><span class="mono">mod 2</span> gives the remainder after dividing by 2. Odd numbers have remainder <b>1</b>. Even numbers have remainder <b>0</b>.</li>
+    </ul>
+    <p style="margin:6px 0">Try it on <span class="mono">nums = [3, 4, 7, 10, 5]</span>. Click a number to see what keep asks about it.</p>
+    <div class="chips" id="p4-learn-chips"></div>
+    <div id="p4-learn-msg"></div>
+    <details><summary>Show the fixed block</summary>
+      <div class="blocks-wrap" data-sb="p4Fixed"></div>
+      <p class="sub">The sum of the odd numbers in [3, 4, 7, 10, 5] is 3 + 7 + 5 = 15.</p>
+    </details>
+  </div>
+  <div class="earn-box">
+    <span class="tag earn">Earn</span>
+    <h3>a) A new buggy block. Which two things are wrong? <span class="pts" id="pts-p4a"></span></h3>
+    <p class="sub" id="p4-goal"></p>
+    <div class="blocks-wrap" id="p4-earn-sb"></div>
+    <div class="checklist" id="p4-bugs"></div>
+    <button id="p4a-check" class="primary">Check</button>
+    <div id="p4a-msg"></div>
+    <h3>b) Fix the keep part. <span class="pts" id="pts-p4b"></span></h3>
+    <p class="sub">Pick what goes in each spot. The block updates as you pick.</p>
+    <div class="slots" id="p4-slots"></div>
+    <div class="blocks-wrap" id="p4-fix-sb"></div>
+    <button id="p4b-check" class="primary">Check</button>
+    <div id="p4b-msg"></div>
+  </div>
+</div>
+
+<!-- ============ PROBLEM 5 ============ -->
+<div class="card" id="p5">
+  <span class="pts" id="pts-p5"></span>
+  <h2>5. Put the blocks back together</h2>
+  <p class="sub">Quest Section 3, first part. 2.5 points.</p>
+  <div class="learn-box">
+    <span class="tag learn">Learn</span> The quest block: report all the words in the list that start with the input <span class="mono">letter</span>.
+    <p style="margin:6px 0">Build it. Pick a block for each spot, then click Run to test it on <span class="mono">nouns = [giraffe, cat, girl, apple, goat, dog]</span> with letter <span class="mono">g</span>.</p>
+    <div class="slots" id="p5-learn-slots"></div>
+    <div class="blocks-wrap" id="p5-learn-sb"></div>
+    <button id="p5-learn-run">Run</button>
+    <div id="p5-learn-msg"></div>
+  </div>
+  <div class="earn-box">
+    <span class="tag earn">Earn</span> <span id="p5-goal"></span>
+    <div class="slots" id="p5-earn-slots"></div>
+    <div class="blocks-wrap" id="p5-earn-sb"></div>
+    <button id="p5-check" class="primary">Check</button>
+    <div id="p5-msg"></div>
+  </div>
+</div>
+
+<!-- ============ PROBLEM 6 ============ -->
+<div class="card" id="p6">
+  <span class="pts" id="pts-p6"></span>
+  <h2>6. Keep, then map, then combine</h2>
+  <p class="sub">Quest Section 3, second part. 0.5 points.</p>
+  <div class="learn-box">
+    <span class="tag learn">Learn</span> The quest block: report the sum of every number in the list, doubled.
+    <span class="mono">sum the double of every number in the list [5, a, b, 4, c, 1050, :)]</span> reports <b>2118</b>.
+    <p style="margin:6px 0">Think about it from the inside out. What has to happen first? You cannot double "a". So first <b>keep</b> only the numbers. Then <b>map</b> to double each one. Then <b>combine</b> to add them up.</p>
+    <div class="blocks-wrap" data-sb="p6Answer"></div>
+    <table class="trace">
+      <tr><th>step</th><th>result</th></tr>
+      <tr><td>data</td><td class="mono">[5, a, b, 4, c, 1050, :)]</td></tr>
+      <tr><td>keep items (is ( ) a number?)</td><td class="mono">[5, 4, 1050]</td></tr>
+      <tr><td>map (( ) × 2)</td><td class="mono">[10, 8, 2100]</td></tr>
+      <tr><td>combine using +</td><td class="mono">2118</td></tr>
+    </table>
+  </div>
+  <div class="earn-box">
+    <span class="tag earn">Earn</span> <span id="p6-goal"></span>
+    <p class="sub">Pick the outside block, the middle block, and the inside block.</p>
+    <div class="slots" id="p6-slots"></div>
+    <div class="blocks-wrap" id="p6-sb"></div>
+    <button id="p6-check" class="primary">Check</button>
+    <div id="p6-msg"></div>
+  </div>
+</div>
+
+<!-- ============ SUMMARY ============ -->
+<div class="card" id="summary">
+  <h2>Turn this in</h2>
+  <p class="sub">Screenshot this whole box and turn it in.</p>
+  <div id="sum-who"></div>
+  <table id="sum-table"></table>
+  <div class="total" id="sum-total"></div>
+  <p class="sub" id="sum-time"></p>
+  <details><summary>Start over (clears everything on this page)</summary>
+    <button id="reset-all">Yes, clear my progress</button>
+  </details>
+</div>
+
+</main>
+
+<script src="snapblocks.min.js"></script>
+<script>
+"use strict";
+
+/* ---------------- helpers ---------------- */
+const $ = (id) => document.getElementById(id);
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const isVowel = (ch) => "aeiou".includes(String(ch).toLowerCase());
+const norm = (s) => String(s).trim().toLowerCase().replace(/^["'“”‘’]+|["'“”‘’]+$/g, "").replace(/\s+/g, "");
+
+function sb(el, text, scale) {
+  el.innerHTML = "";
+  const pre = document.createElement("pre");
+  pre.className = "blocks";
+  pre.textContent = text;
+  el.appendChild(pre);
+  try { snapblocks.renderElement(pre, { style: "snap", scale: scale || 1.25 }); } catch (e) { /* leave text */ }
+}
+function msg(el, kind, text) { el.innerHTML = ""; const d = document.createElement("div"); d.className = "msg " + kind; d.textContent = text; el.appendChild(d); }
+function msgHTML(el, kind, html) { el.innerHTML = '<div class="msg ' + kind + '">' + html + "</div>"; }
+const sbList = (items) => "(list " + items.map((w) => "[" + w + "]").join(" ") + " @<:>)";
+
+/* ---------------- saved state ---------------- */
+const KEY = "bcs-quest5-v1";
+const POINTS = { p1a: 1, p1b: 1, p2: 1, p3a: 1, p3b: 1, p4a: 1, p4b: 1, p5: 2.5, p6: 0.5 };
+const LABELS = { p1a: "1a  mys word", p1b: "1b  mys word (y word)", p2: "2   keep report", p3a: "3a  map or keep", p3b: "3b  map or keep",
+  p4a: "4a  find the two bugs", p4b: "4b  fix the keep", p5: "5   rebuild the keep block", p6: "6   keep, map, combine" };
+let S = { name: "", period: "", done: {}, tries: {}, doneAt: {} };
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} renderSummary(); }
+function attempt(id, ok) {
+  if (S.done[id]) return;
+  S.tries[id] = (S.tries[id] || 0) + 1;
+  if (ok) { S.done[id] = true; S.doneAt[id] = new Date().toISOString(); }
+  save();
+}
+function ptsLabel(el, ids) {
+  const got = ids.reduce((s, k) => s + (S.done[k] ? POINTS[k] : 0), 0);
+  const max = ids.reduce((s, k) => s + POINTS[k], 0);
+  el.textContent = got + " / " + max + " pts";
+  el.classList.toggle("done", got === max);
+}
+
+/* ---------------- static blocks ---------------- */
+const SB = {
+  mysWordDef:
+`{(mys word: ((word)) :: operators)} :: define+
+script variables ((new word)) @addInput
+set [new word v] to []
+for ((i)) = (1) to ([length V] of text (word)) {
+  if <not <is a vowel: (letter (i) of (word)) :: operators>> {
+    set [new word v] to (join (new word) (letter (i) of (word)) @<:>)
+  }
+  set [new word v] to (join (new word) (letter (i) of (word)) @<:>)
+} @loop
+report (new word)`,
+  keepExample: `(keep items (<(() mod (2)) = (0)> @>) from (list [1] [2] [3] [4] @<:>))`,
+  mapExample: `(map ((() × (10) @<:>) @>) over (list [1] [2] [3] [4] @<:>))`,
+  p4Buggy:
+`{(sum of odd numbers : ((nums)) :: lists)} :: define+
+report (combine (keep items (<(0) = ((nums) mod (2))> @>) from (nums)) using ((() + () @<:>) @>))`,
+  p4Fixed:
+`{(sum of odd numbers : ((nums)) :: lists)} :: define+
+report (combine (keep items (<(1) = (() mod (2))> @>) from (nums)) using ((() + () @<:>) @>))`,
+  p5Hat: `{(all the words in the list ((words)) that start with the letter: ((letter)) :: lists)} :: define+`,
+  p6Answer:
+`{(sum the double of every number in the list ((data)) :: lists)} :: define+
+report (combine (map ((() × (2) @<:>) @>) over (keep items (<is () a [number V] ?> @>) from (data))) using ((() + () @<:>) @>))`,
+};
+const mysWordsDef = (n) =>
+`{(mys: words: ((words)) :: lists)} :: define+
+report (keep items (<<([length V] of text []) > (${n})> or <is a vowel: (letter (1 v) of []) :: operators>> @>) from (words))`;
+const mysWordsCall = (ws) => `(mys: words: ${sbList(ws)} :: lists)`;
+const mysWordCall = (w) => `(mys word: [${w}] :: operators)`;
+
+/* ================= PROBLEM 1 ================= */
+function mysWord(w) {
+  let out = "";
+  for (const ch of w) { if (!isVowel(ch)) out += ch; out += ch; }
+  return out;
+}
+function mysTrace(w) {
+  const rows = []; let nw = "";
+  for (let i = 1; i <= w.length; i++) {
+    const ch = w[i - 1]; const v = isVowel(ch);
+    let afterIf = nw; if (!v) afterIf = nw + ch;
+    nw = afterIf + ch;
+    rows.push({ i, ch, v, notv: !v, afterIf, after: nw });
+  }
+  return rows;
+}
+let p1Step = 0;
+function p1Render() {
+  const w = ($("p1-learn-word").value || "catapult").trim().toLowerCase().replace(/[^a-z]/g, "") || "catapult";
+  const rows = mysTrace(w);
+  let h = "<tr><th>i</th><th>letter i of word</th><th>is a vowel?</th><th>not (is a vowel)?</th><th>new word after the if</th><th>new word after the 2nd set</th></tr>";
+  rows.forEach((r, k) => {
+    if (k >= p1Step) return;
+    h += `<tr class="${k === p1Step - 1 ? "now" : ""}"><td>${r.i}</td><td class="mono">${r.ch}</td><td>${r.v}</td><td>${r.notv}</td>` +
+         `<td class="mono">${r.afterIf || "&nbsp;"}${r.notv ? " (if ran)" : " (skipped)"}</td><td class="mono"><b>${r.after}</b></td></tr>`;
+  });
+  $("p1-table").innerHTML = h;
+  if (p1Step >= rows.length) msgHTML($("p1-learn-msg"), "info", `Done. <span class="mono">mys word: (${w})</span> reports <b class="mono">${mysWord(w)}</b>. Every consonant shows up twice, every vowel once.`);
+  else $("p1-learn-msg").innerHTML = "";
+  $("p1-next").disabled = p1Step >= rows.length;
+}
+$("p1-next").onclick = () => { p1Step++; p1Render(); };
+$("p1-all").onclick = () => { p1Step = 99; p1Render(); };
+$("p1-reset").onclick = () => { p1Step = 0; p1Render(); };
+$("p1-learn-word").oninput = () => { p1Step = 0; p1Render(); };
+
+const P1A_WORDS = ["planet", "robot", "music", "lemon", "tiger", "pocket", "salad", "window", "basket", "camera", "puzzle", "rocket"];
+const P1B_WORDS = ["gym", "dry", "fly", "sky", "spy", "shy", "cry", "myth", "lynx", "fry"];
+let p1a, p1b;
+function p1Diagnose(w, ans) {
+  const a = norm(ans);
+  if (a === norm(w)) return "NOT QUITE - you gave back the word unchanged. The second set block runs every time, and the one in the if adds an extra copy of some letters.";
+  let onlyIf = ""; for (const ch of w) if (!isVowel(ch)) onlyIf += ch;
+  if (a === onlyIf) return "NOT QUITE - that is only what the if adds. The second set block is outside the if, so it runs every time too.";
+  let dbl = ""; for (const ch of w) dbl += ch + ch;
+  if (a === dbl) return "NOT QUITE - you doubled every letter. The if only runs when the letter is NOT a vowel, so vowels only get added once.";
+  let vowDbl = ""; for (const ch of w) { if (isVowel(ch)) vowDbl += ch; vowDbl += ch; }
+  if (a === vowDbl) return "NOT QUITE - you doubled the vowels. Look at the not: the if runs when the letter is NOT a vowel.";
+  return "NOT QUITE - step through it in the Learn part above with your word, one pass at a time.";
+}
+function p1New(which) {
+  if (which === "a") {
+    p1a = pick(P1A_WORDS.filter((w) => w !== p1a));
+    $("p1a-call").textContent = "mys word: (" + p1a + ")"; sb($("p1a-sb"), mysWordCall(p1a)); $("p1a-ans").value = "";
+  } else {
+    p1b = pick(P1B_WORDS.filter((w) => w !== p1b));
+    $("p1b-call").textContent = "mys word: (" + p1b + ")"; sb($("p1b-sb"), mysWordCall(p1b)); $("p1b-ans").value = "";
+  }
+}
+function p1Check(which) {
+  const w = which === "a" ? p1a : p1b; const ans = $("p1" + which + "-ans").value; const out = $("p1" + which + "-msg");
+  const id = "p1" + which;
+  if (S.done[id]) { msg(out, "good", "CORRECT - you already earned this point."); return; }
+  if (!norm(ans)) { msg(out, "bad", "Type an answer first."); return; }
+  const ok = norm(ans) === mysWord(w);
+  attempt(id, ok);
+  if (ok) msg(out, "good", "CORRECT - mys word: (" + w + ") reports " + mysWord(w) + ".");
+  else { const d = p1Diagnose(w, ans); p1New(which); msg(out, "bad", d + " Here is a new word to try."); }
+  updatePts();
+}
+$("p1a-check").onclick = () => p1Check("a");
+$("p1b-check").onclick = () => p1Check("b");
+$("p1a-ans").onkeydown = (e) => { if (e.key === "Enter") p1Check("a"); };
+$("p1b-ans").onkeydown = (e) => { if (e.key === "Enter") p1Check("b"); };
+
+/* ================= PROBLEM 2 ================= */
+const P2_LEARN = ["iron", "brick", "stone", "oak", "what", "catapult"];
+const mysWordsKeep = (ws, n) => ws.filter((w) => w.length > n || isVowel(w[0]));
+function p2Learn() {
+  sb($("p2-learn-def"), mysWordsDef(5));
+  sb($("p2-learn-call"), mysWordsCall(P2_LEARN));
+  let h = "<tr><th>word</th><th>length</th><th>length &gt; 5?</th><th>first letter</th><th>is a vowel?</th><th>or</th><th>keep or drop?</th></tr>";
+  P2_LEARN.forEach((w, k) => {
+    h += `<tr data-k="${k}"><td class="mono">${w}</td><td class="r" data-c="len"></td><td class="r" data-c="gt"></td><td class="r" data-c="first"></td><td class="r" data-c="v"></td><td class="r" data-c="or"></td>` +
+         `<td><button data-a="keep">keep</button> <button data-a="drop">drop</button> <span class="verdict"></span></td></tr>`;
+  });
+  $("p2-table").innerHTML = h;
+  $("p2-table").querySelectorAll("button").forEach((b) => b.onclick = () => {
+    const tr = b.closest("tr"); const w = P2_LEARN[+tr.dataset.k];
+    const gt = w.length > 5, v = isVowel(w[0]), keep = gt || v;
+    const said = b.dataset.a === "keep";
+    tr.querySelector('[data-c="len"]').textContent = w.length;
+    tr.querySelector('[data-c="gt"]').textContent = gt;
+    tr.querySelector('[data-c="first"]').textContent = w[0];
+    tr.querySelector('[data-c="v"]').textContent = v;
+    tr.querySelector('[data-c="or"]').textContent = keep;
+    const vd = tr.querySelector(".verdict");
+    vd.textContent = said === keep ? "  CORRECT - " + (keep ? "kept" : "dropped") : "  NOT QUITE - " + (keep ? "kept" : "dropped") + ", see the row";
+    vd.style.color = said === keep ? "var(--good)" : "var(--bad)";
+    const allDone = [...$("p2-table").querySelectorAll('[data-c="or"]')].every((td) => td.textContent);
+    if (allDone) msgHTML($("p2-learn-msg"), "info", "The call reports <b class=\"mono\">[iron, oak, catapult]</b>. brick and stone have 5 letters, and 5 is not &gt; 5.");
+  });
+}
+let p2 = null;
+const P2_POOL = ["apple", "dog", "banana", "egg", "tree", "orange", "cat", "umbrella", "sun", "island", "pencil", "ant", "house", "elbow", "frog", "window", "ice", "rabbit", "owl", "garden", "jam", "olive", "planet", "kite"];
+function p2New() {
+  const n = pick([3, 4, 5]);
+  let ws, ans;
+  do { ws = shuffle(P2_POOL).slice(0, 6); ans = mysWordsKeep(ws, n); } while (ans.length < 2 || ans.length > 4);
+  p2 = { n, ws, ans };
+  sb($("p2-earn-def"), mysWordsDef(n));
+  sb($("p2-earn-call"), mysWordsCall(ws));
+  $("p2-chips").innerHTML = "";
+  ws.forEach((w) => { const c = document.createElement("span"); c.className = "chip"; c.textContent = w; c.onclick = () => c.classList.toggle("on"); $("p2-chips").appendChild(c); });
+}
+$("p2-check").onclick = () => {
+  const out = $("p2-msg");
+  if (S.done.p2) { msg(out, "good", "CORRECT - you already earned this point."); return; }
+  const chosen = [...$("p2-chips").children].filter((c) => c.classList.contains("on")).map((c) => c.textContent);
+  const ok = chosen.join(",") === p2.ans.join(",");
+  attempt("p2", ok);
+  if (ok) { msg(out, "good", "CORRECT - it reports [" + p2.ans.join(", ") + "]."); updatePts(); return; }
+  const n = p2.n;
+  const andAns = p2.ws.filter((w) => w.length > n && isVowel(w[0]));
+  const geAns = p2.ws.filter((w) => w.length >= n || isVowel(w[0]));
+  let why = "NOT QUITE - check each word: is its length more than " + n + "? Does it start with a vowel? If either one is true, it stays.";
+  if (chosen.join(",") === andAns.join(",")) why = "NOT QUITE - you kept words where BOTH were true. This is or, so only one side has to be true.";
+  else if (chosen.join(",") === geAns.join(",")) why = "NOT QUITE - you kept words with exactly " + n + " letters. > " + n + " means more than " + n + ", so " + n + " letters is not enough.";
+  p2New(); msg(out, "bad", why + " Here is a new one."); updatePts();
+};
+
+/* ================= PROBLEM 3 ================= */
+const P3_KEEP = [
+  "Find all the values in a list that are numbers.",
+  "Find all the words in a list that are longer than 4 letters.",
+  "Find all the test scores in a list that are 90 or higher.",
+  "Find all the names in a list that start with the letter J.",
+  "Find all the numbers in a list that are even.",
+  "Find all the songs in a playlist that are shorter than 3 minutes.",
+  "Find all the words in a list that contain the letter z.",
+  "Find all the temperatures in a list that are below freezing.",
+];
+const P3_MAP = [
+  "Get the last letter of every word in a list.",
+  "Double every number in a list.",
+  "Get the length of every word in a list.",
+  "Make every word in a list uppercase.",
+  "Add 5 points to every score in a list.",
+  "Get the first letter of every name in a list.",
+  "Turn every price in a list into a price with tax added.",
+  "Join an exclamation mark onto the end of every word in a list.",
+];
+const P3_WHY_KEEP = "It is Keep. You want only SOME of the items, and they come back unchanged.";
+const P3_WHY_MAP = "It is Map. You want EVERY item, each one changed.";
+function p3Learn() {
+  const qs = shuffle([...P3_KEEP.slice(0, 4).map((q) => [q, "keep"]), ...P3_MAP.slice(0, 4).map((q) => [q, "map"])]);
+  $("p3-learn").innerHTML = "";
+  qs.forEach(([q, a]) => {
+    const d = document.createElement("div"); d.className = "scenario";
+    d.innerHTML = `<p class="q">${q}</p><div class="btns"><button data-a="map">Map</button><button data-a="keep">Keep</button></div><div class="m"></div>`;
+    d.querySelectorAll("button").forEach((b) => b.onclick = () => {
+      const ok = b.dataset.a === a;
+      msg(d.querySelector(".m"), ok ? "good" : "bad", (ok ? "CORRECT - " : "NOT QUITE - ") + (a === "keep" ? P3_WHY_KEEP : P3_WHY_MAP));
+    });
+    $("p3-learn").appendChild(d);
+  });
+}
+const p3 = { a: null, b: null };
+function p3New(slot) {
+  const used = [p3.a && p3.a[0], p3.b && p3.b[0]];
+  const kind = Math.random() < 0.5 ? "keep" : "map";
+  const pool = (kind === "keep" ? P3_KEEP.slice(4) : P3_MAP.slice(4)).filter((q) => !used.includes(q));
+  p3[slot] = [pick(pool), kind];
+  if (p3.a && p3.b) p3Render();
+}
+function p3Render() {
+  $("p3-earn").innerHTML = "";
+  ["a", "b"].forEach((slot) => {
+    const id = "p3" + slot; const [q, a] = p3[slot];
+    const d = document.createElement("div"); d.className = "scenario";
+    d.innerHTML = `<p class="q"><b>${slot})</b> ${S.done[id] ? "Done." : q} <span class="pts" id="pts-${id}"></span></p>` +
+      (S.done[id] ? "" : `<div class="btns"><button data-a="map">Map</button><button data-a="keep">Keep</button></div>`) + `<div class="m"></div>`;
+    d.querySelectorAll("button").forEach((b) => b.onclick = () => {
+      const ok = b.dataset.a === a;
+      attempt(id, ok);
+      if (ok) { p3Render(); msg($("p3-earn").children[slot === "a" ? 0 : 1].querySelector(".m"), "good", "CORRECT - " + (a === "keep" ? P3_WHY_KEEP : P3_WHY_MAP)); }
+      else { const why = "NOT QUITE - " + (a === "keep" ? P3_WHY_KEEP : P3_WHY_MAP); p3New(slot); msg($("p3-earn").children[slot === "a" ? 0 : 1].querySelector(".m"), "bad", why + " Here is a new one."); }
+      updatePts();
+    });
+    $("p3-earn").appendChild(d);
+  });
+  updatePts();
+}
+
+/* ================= PROBLEM 4 ================= */
+const P4_LEARN_NUMS = [3, 4, 7, 10, 5];
+function p4Learn() {
+  $("p4-learn-chips").innerHTML = "";
+  P4_LEARN_NUMS.forEach((x) => {
+    const c = document.createElement("span"); c.className = "chip"; c.textContent = x;
+    c.onclick = () => {
+      const odd = x % 2 === 1;
+      msgHTML($("p4-learn-msg"), "info",
+        `<b>As written</b>, keep asks <span class="mono">0 = (nums mod 2)</span>. That uses the whole list <span class="mono">[3, 4, 7, 10, 5]</span>, not ${x}, so it asks the same thing for every item, and the answer is a list, not true or false. Keep can't use that.<br>` +
+        `<b>Fixed</b>, keep asks <span class="mono">1 = (${x} mod 2)</span>. ${x} mod 2 is ${x % 2}, so the answer is <b>${odd}</b> and ${x} is <b>${odd ? "kept" : "dropped"}</b>.`);
+    };
+    $("p4-learn-chips").appendChild(c);
+  });
+}
+let p4 = null;
+function p4New() {
+  const target = pick(["odd", "even"]);
+  const op = pick(["+", "×"]);
+  const v = pick(["nums", "values", "data"]);
+  const goodR = target === "odd" ? 1 : 0;
+  const name = (op === "+" ? "sum" : "product") + " of " + target + " numbers";
+  p4 = { target, op, v, goodR, name };
+  $("p4-goal").textContent = "This block SHOULD report the " + (op === "+" ? "sum" : "product") + " of the " + target + " numbers in " + v + ". It has two mistakes.";
+  sb($("p4-earn-sb"), `{(${name} : ((${v})) :: lists)} :: define+
+report (combine (keep items (<(${1 - goodR}) = ((${v}) mod (2))> @>) from (${v})) using ((() ${op} () @<:>) @>))`);
+  const right = [
+    `It puts ${v} inside the keep test. That is the whole list, so keep is not testing one item at a time. That spot should be the empty slot.`,
+    `It checks for a remainder of ${1 - goodR}. ${target === "odd" ? "Odd" : "Even"} numbers have a remainder of ${goodR} when you mod by 2, so it keeps the wrong numbers.`,
+  ];
+  const wrong = [
+    `It should use map instead of keep.`,
+    `The ${op} in combine should be ${op === "+" ? "×" : "+"}.`,
+    `combine should go inside keep, not the other way around.`,
+    `mod 2 should be mod 10.`,
+    `The list ${v} at the end of keep should be the empty slot.`,
+  ];
+  const opts = shuffle([...right.map((t) => [t, true]), ...shuffle(wrong).slice(0, 3).map((t) => [t, false])]);
+  $("p4-bugs").innerHTML = "";
+  opts.forEach(([t, ok]) => {
+    const l = document.createElement("label"); l.innerHTML = `<input type="checkbox"> `; l.appendChild(document.createTextNode(t)); l.dataset.ok = ok ? "1" : "";
+    $("p4-bugs").appendChild(l);
+  });
+  p4Slots();
+}
+const p4Pick = { left: null, r: null };
+function p4Slots() {
+  p4Pick.left = null; p4Pick.r = null;
+  const slots = $("p4-slots"); slots.innerHTML = "";
+  addSlot(slots, "The number keep tests", [["empty", "(() mod (2))"], ["list", `((${p4.v}) mod (2))`]], (k) => { p4Pick.left = k; p4Draw(); }, "reporter");
+  addSlot(slots, "The remainder it wants", [["0", "!0"], ["1", "!1"]], (k) => { p4Pick.r = k; p4Draw(); }, "reporter");
+  p4Draw();
+}
+function p4Draw() {
+  const L = p4Pick.left === "list" ? `((${p4.v}) mod (2))` : p4Pick.left === "empty" ? "(() mod (2))" : "[ ]";
+  const R = p4Pick.r === null ? "[ ]" : `(${p4Pick.r})`;
+  sb($("p4-fix-sb"), `(keep items (<${R} = ${L}> @>) from (${p4.v}))`);
+}
+$("p4a-check").onclick = () => {
+  const out = $("p4a-msg");
+  if (S.done.p4a) { msg(out, "good", "CORRECT - you already earned this point."); return; }
+  const labels = [...$("p4-bugs").children];
+  const checked = labels.filter((l) => l.querySelector("input").checked);
+  if (checked.length !== 2) { msg(out, "bad", "Pick exactly two."); return; }
+  const ok = checked.every((l) => l.dataset.ok);
+  attempt("p4a", ok);
+  if (ok) msg(out, "good", "CORRECT - both mistakes are inside the keep test. Now fix it below.");
+  else { p4New(); msg(out, "bad", "NOT QUITE - both mistakes are inside the keep ring. Look at what is in the slot and which remainder it checks for. Here is a new block."); }
+  updatePts();
+};
+$("p4b-check").onclick = () => {
+  const out = $("p4b-msg");
+  if (S.done.p4b) { msg(out, "good", "CORRECT - you already earned this point."); return; }
+  if (!p4Pick.left || p4Pick.r === null) { msg(out, "bad", "Pick something for both spots."); return; }
+  const ok = p4Pick.left === "empty" && +p4Pick.r === p4.goodR;
+  attempt("p4b", ok);
+  if (ok) { msg(out, "good", "CORRECT - keep now tests each number by itself and keeps the " + p4.target + " ones."); updatePts(); return; }
+  let why = "";
+  if (p4Pick.left !== "empty") why = "NOT QUITE - " + p4.v + " is the whole list. Keep needs the empty slot so each item gets dropped in, one at a time.";
+  else why = "NOT QUITE - " + p4.target + " numbers have a remainder of " + p4.goodR + " after mod 2.";
+  p4New(); msg(out, "bad", why + " The block above changed, so look again.");
+  updatePts();
+};
+
+/* ---------------- slot picker (problems 4, 5, 6) ---------------- */
+function addSlot(container, label, options, onPick, shape) {
+  const lab = document.createElement("label"); lab.textContent = label;
+  const box = document.createElement("div"); box.className = "slot-opts";
+  options.forEach(([key, text]) => {
+    const o = document.createElement("span"); o.className = "opt"; o.tabIndex = 0;
+    if (text.startsWith("!")) { o.innerHTML = '<span class="plain">' + text.slice(1) + '</span>'; } else sb(o, text, 1.1);
+    const choose = () => { box.querySelectorAll(".opt").forEach((x) => x.classList.remove("on")); o.classList.add("on"); onPick(key); };
+    o.onclick = choose; o.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choose(); } };
+    box.appendChild(o);
+  });
+  container.appendChild(lab); container.appendChild(box);
+}
+
+/* ================= PROBLEM 5 ================= */
+/* A tiny evaluator: each piece is a function (item, env) -> value. A list value
+   inside a comparison makes the keep test report a list, which Snap rejects. */
+const LIST = (v) => Array.isArray(v);
+function cmp(op, a, b) {
+  if (LIST(a) || LIST(b)) return { err: "compares a whole list, so the test does not report true or false for one item" };
+  if (op === "=") return String(a).toLowerCase() === String(b).toLowerCase();
+  const x = Number(a), y = Number(b);
+  if (isNaN(x) || isNaN(y)) return { err: "compares words with " + op };
+  return op === ">" ? x > y : x < y;
+}
+function runKeep(spec, pick, env) {
+  const list = spec.listOf[pick.list](env);
+  if (!LIST(list)) return { err: "the from spot needs a list, and " + pick.list + " is not a list" };
+  const out = [];
+  for (const item of list) {
+    const r = cmp(pick.op, spec.left[pick.left].f(item, env), spec.right[pick.right].f(item, env));
+    if (r && r.err) return r;
+    if (r) out.push(item);
+  }
+  return out;
+}
+const firstLetter = (x) => LIST(x) ? x.map((w) => String(w)[0]) : String(x)[0];
+const P5_LEARN = {
+  hat: SB.p5Hat,
+  left: {
+    first: { t: "(letter (1 v) of ())", f: (it) => firstLetter(it) },
+    firstWords: { t: "(letter (1 v) of (words))", f: (it, e) => firstLetter(e.words) },
+    letter: { t: "(letter)", f: (it, e) => e.letter },
+    empty: { t: "()", label: "!empty slot <span class=\"hole\"></span>", f: (it) => it },
+  },
+  ops: ["="],
+  right: {
+    letter: { t: "(letter)", f: (it, e) => e.letter },
+    words: { t: "(words)", f: (it, e) => e.words },
+    empty: { t: "()", label: "!empty slot <span class=\"hole\"></span>", f: (it) => it },
+  },
+  listOf: { words: (e) => e.words, letter: (e) => e.letter },
+  listT: { words: "(words)", letter: "(letter)" },
+  tests: [{ words: ["giraffe", "cat", "girl", "apple", "goat", "dog"], letter: "g" }],
+};
+const P5_FRESH = [
+  {
+    goal: "Build the block that reports all the numbers in nums that are bigger than the input limit.",
+    hat: `{(all the numbers in ((nums)) bigger than ((limit)) :: lists)} :: define+`,
+    left: { empty: { t: "()", label: "!empty slot <span class=\"hole\"></span>", f: (it) => it }, nums: { t: "(nums)", f: (it, e) => e.nums }, limit: { t: "(limit)", f: (it, e) => e.limit } },
+    ops: [">", "<", "="],
+    right: { limit: { t: "(limit)", f: (it, e) => e.limit }, empty: { t: "()", label: "!empty slot <span class=\"hole\"></span>", f: (it) => it }, nums: { t: "(nums)", f: (it, e) => e.nums } },
+    listOf: { nums: (e) => e.nums, limit: (e) => e.limit },
+    listT: { nums: "(nums)", limit: "(limit)" },
+    expect: (e) => e.nums.filter((x) => x > e.limit),
+    tests: [{ nums: [4, 12, 7, 30, 9, 15], limit: 10 }, { nums: [1, 2, 3, 50, 49], limit: 49 }, { nums: [8, 3, 8], limit: 2 }],
+    example: "all the numbers in [4, 12, 7, 30, 9, 15] bigger than 10 reports [12, 30, 15]",
+  },
+  {
+    goal: "Build the block that reports all the words in words that have exactly n letters.",
+    hat: `{(all the words in ((words)) with exactly ((n)) letters :: lists)} :: define+`,
+    left: { len: { t: "([length V] of text ())", f: (it) => LIST(it) ? it.map((w) => w.length) : String(it).length }, empty: { t: "()", label: "!empty slot <span class=\"hole\"></span>", f: (it) => it },
+            lenWords: { t: "([length V] of text (words))", f: (it, e) => e.words.map((w) => w.length) }, n: { t: "(n)", f: (it, e) => e.n } },
+    ops: ["=", ">", "<"],
+    right: { n: { t: "(n)", f: (it, e) => e.n }, empty: { t: "()", label: "!empty slot <span class=\"hole\"></span>", f: (it) => it }, words: { t: "(words)", f: (it, e) => e.words } },
+    listOf: { words: (e) => e.words, n: (e) => e.n },
+    listT: { words: "(words)", n: "(n)" },
+    expect: (e) => e.words.filter((w) => w.length === e.n),
+    tests: [{ words: ["cat", "horse", "dog", "zebra", "ox"], n: 3 }, { words: ["apple", "kiwi", "plum", "fig"], n: 4 }],
+    example: "all the words in [cat, horse, dog, zebra, ox] with exactly 3 letters reports [cat, dog]",
+  },
+  {
+    goal: "Build the block that reports all the words in words that start with a vowel.",
+    hat: `{(all the words in ((words)) that start with a vowel :: lists)} :: define+`,
+    left: { first: { t: "(letter (1 v) of ())", f: (it) => firstLetter(it) }, firstWords: { t: "(letter (1 v) of (words))", f: (it, e) => firstLetter(e.words) }, empty: { t: "()", label: "!empty slot <span class=\"hole\"></span>", f: (it) => it } },
+    ops: ["vowel"],
+    right: {},
+    listOf: { words: (e) => e.words },
+    listT: { words: "(words)" },
+    expect: (e) => e.words.filter((w) => isVowel(w[0])),
+    tests: [{ words: ["apple", "dog", "igloo", "cat", "egg"] }, { words: ["owl", "sun", "umbrella"] }],
+    example: "all the words in [apple, dog, igloo, cat, egg] that start with a vowel reports [apple, igloo, egg]",
+  },
+];
+function p5BlockText(spec, pk) {
+  const L = pk.left ? spec.left[pk.left].t : "[ ]";
+  const list = pk.list ? spec.listT[pk.list] : "[ ]";
+  let test;
+  if (spec.ops[0] === "vowel") test = `<is a vowel: ${L} :: operators>`;
+  else { const R = pk.right ? spec.right[pk.right].t : "[ ]"; test = `<${L} ${pk.op || "[ ]"} ${R}>`; }
+  return `${spec.hat}\nreport (keep items (${test} @>) from ${list})`;
+}
+function p5Eval(spec, pk, env) {
+  if (spec.ops[0] === "vowel") {
+    const list = spec.listOf[pk.list](env); const out = [];
+    for (const it of list) { const v = spec.left[pk.left].f(it, env); if (LIST(v)) return { err: "tests the whole list, so the test does not report true or false for one item" }; if (isVowel(v)) out.push(it); }
+    return out;
+  }
+  return runKeep(spec, Object.assign({ op: spec.ops[0] }, pk), env);
+}
+function p5Builder(spec, slotsEl, sbEl, pk) {
+  slotsEl.innerHTML = "";
+  const draw = () => sb(sbEl, p5BlockText(spec, pk));
+  addSlot(slotsEl, spec.ops[0] === "vowel" ? "What gets tested" : "Left side", Object.entries(spec.left).map(([k, v]) => [k, v.label || v.t]), (k) => { pk.left = k; draw(); });
+  if (spec.ops[0] !== "vowel") {
+    if (spec.ops.length > 1) addSlot(slotsEl, "Compare with", spec.ops.map((o) => [o, `<() ${o} ()>`]), (k) => { pk.op = k; draw(); });
+    else pk.op = spec.ops[0];
+    addSlot(slotsEl, "Right side", Object.entries(spec.right).map(([k, v]) => [k, v.label || v.t]), (k) => { pk.right = k; draw(); });
+  }
+  addSlot(slotsEl, "Keep from", Object.entries(spec.listT).map(([k, t]) => [k, t]), (k) => { pk.list = k; draw(); });
+  draw();
+}
+const p5LearnPick = {};
+$("p5-learn-run").onclick = () => {
+  const out = $("p5-learn-msg"); const pk = p5LearnPick;
+  if (!pk.left || !pk.right || !pk.list) { msg(out, "bad", "Pick something for every spot first."); return; }
+  const env = P5_LEARN.tests[0];
+  const r = p5Eval(P5_LEARN, pk, env);
+  if (r.err) { msg(out, "bad", "Snap would stop with an error: this " + r.err + "."); return; }
+  const right = env.words.filter((w) => w[0] === env.letter);
+  if (r.join() === right.join()) msgHTML(out, "good", `CORRECT - it reports <b class="mono">[${r.join(", ")}]</b>. The empty slot inside <span class="mono">letter 1 of ( )</span> is where each word goes.`);
+  else msgHTML(out, "bad", `NOT QUITE - it reports <span class="mono">[${r.join(", ")}]</span>. We want <span class="mono">[${right.join(", ")}]</span>. Remember: each word goes into the empty slot.`);
+};
+let p5 = null; let p5Pick = {};
+function p5New() {
+  p5 = pick(P5_FRESH.filter((s) => s !== p5)); p5Pick = {};
+  $("p5-goal").textContent = p5.goal + " Example: " + p5.example + ".";
+  p5Builder(p5, $("p5-earn-slots"), $("p5-earn-sb"), p5Pick);
+}
+$("p5-check").onclick = () => {
+  const out = $("p5-msg");
+  if (S.done.p5) { msg(out, "good", "CORRECT - you already earned these points."); return; }
+  const needRight = p5.ops[0] !== "vowel";
+  if (!p5Pick.left || !p5Pick.list || (needRight && (!p5Pick.right || !p5Pick.op))) { msg(out, "bad", "Pick something for every spot first."); return; }
+  let bad = null;
+  for (const env of p5.tests) {
+    const r = p5Eval(p5, p5Pick, env);
+    if (r.err) { bad = "NOT QUITE - Snap would stop with an error: this " + r.err + "."; break; }
+    const want = p5.expect(env);
+    if (r.join() !== want.join()) { bad = `NOT QUITE - on one test it reported [${r.join(", ")}] but should report [${want.join(", ")}].`; break; }
+  }
+  attempt("p5", !bad);
+  if (!bad) msg(out, "good", "CORRECT - it gives the right answer on every test we ran.");
+  else { p5New(); msg(out, "bad", bad + " Here is a new one. Use the Learn part above to test your thinking."); }
+  updatePts();
+};
+
+/* ================= PROBLEM 6 ================= */
+let p6 = null; const p6Pick = { outer: null, middle: null, inner: null };
+const P6_STEPS = {
+  keep: { name: "keep", t: (x) => `(keep items (<is () a [number V] ?> @>) from ${x})` },
+  map: { name: "map", t: (x) => `(map ((() × (${p6.k}) @<:>) @>) over ${x})` },
+  combine: { name: "combine", t: (x) => `(combine ${x} using ((() + () @<:>) @>))` },
+};
+function p6Run(order, data) {
+  let v = data;
+  for (const step of order) {
+    if (step === "keep") { if (!LIST(v)) return { err: "keep needs a list, but it got the number " + v }; v = v.filter((x) => typeof x === "number"); }
+    else if (step === "map") { if (!LIST(v)) return { err: "map needs a list, but it got the number " + v }; const bad = v.find((x) => typeof x !== "number"); if (bad !== undefined) return { err: "map tried to multiply \"" + bad + "\", which is not a number" }; v = v.map((x) => x * p6.k); }
+    else { if (!LIST(v)) return { err: "combine needs a list, but it got the number " + v }; const bad = v.find((x) => typeof x !== "number"); if (bad !== undefined) return { err: "combine tried to add \"" + bad + "\", which is not a number" }; v = v.reduce((a, b) => a + b, 0); }
+  }
+  return { v };
+}
+function p6New() {
+  const k = pick([3, 5, 10]);
+  const nums = shuffle([2, 6, 7, 11, 20, 25, 40]).slice(0, 3);
+  const words = shuffle(["x", "hi", "ok", ":(", "z", "cat"]).slice(0, 3);
+  const data = shuffle([...nums, ...words]);
+  p6 = { k, data, want: nums.reduce((a, b) => a + b, 0) * k };
+  const word = { 3: "triple", 5: "five times", 10: "ten times" }[k];
+  $("p6-goal").textContent = `Build the block that reports the sum of ${word} every number in the list. For data = [${data.join(", ")}] it should report ${p6.want}.`;
+  p6Pick.outer = p6Pick.middle = p6Pick.inner = null;
+  const slots = $("p6-slots"); slots.innerHTML = "";
+  const opts = () => Object.entries(P6_STEPS).map(([key, s]) => [key, s.t("[ ]")]);
+  addSlot(slots, "Outside (runs last)", opts(), (k2) => { p6Pick.outer = k2; p6Draw(); });
+  addSlot(slots, "Middle", opts(), (k2) => { p6Pick.middle = k2; p6Draw(); });
+  addSlot(slots, "Inside (runs first)", opts(), (k2) => { p6Pick.inner = k2; p6Draw(); });
+  p6Draw();
+}
+function p6Draw() {
+  const wrap = (key, x) => key ? P6_STEPS[key].t(x) : "[ ]";
+  const inner = wrap(p6Pick.inner, "(data)");
+  const mid = wrap(p6Pick.middle, inner);
+  const outer = wrap(p6Pick.outer, mid);
+  sb($("p6-sb"), `{(sum ${p6.k} times every number in ((data)) :: lists)} :: define+\nreport ${outer}`);
+}
+$("p6-check").onclick = () => {
+  const out = $("p6-msg");
+  if (S.done.p6) { msg(out, "good", "CORRECT - you already earned this."); return; }
+  const o = [p6Pick.inner, p6Pick.middle, p6Pick.outer];
+  if (o.some((x) => !x)) { msg(out, "bad", "Pick a block for all three spots."); return; }
+  let bad = null;
+  if (new Set(o).size !== 3) bad = "NOT QUITE - use each of keep, map and combine once.";
+  else {
+    const r = p6Run(o, p6.data);
+    if (r.err) bad = "NOT QUITE - Snap would stop with an error: " + r.err + ".";
+    else if (r.v !== p6.want) bad = `NOT QUITE - that reports ${JSON.stringify(r.v)}, not ${p6.want}.`;
+  }
+  attempt("p6", !bad);
+  if (!bad) msg(out, "good", "CORRECT - keep the numbers, map to multiply each one, combine to add them up.");
+  else { p6New(); msg(out, "bad", bad + " Think inside out: what has to happen first? Here is a new one."); }
+  updatePts();
+};
+
+/* ---------------- summary ---------------- */
+function updatePts() {
+  ptsLabel($("pts-p1"), ["p1a", "p1b"]); ptsLabel($("pts-p1a"), ["p1a"]); ptsLabel($("pts-p1b"), ["p1b"]);
+  ptsLabel($("pts-p2"), ["p2"]);
+  ptsLabel($("pts-p3"), ["p3a", "p3b"]);
+  if ($("pts-p3a")) ptsLabel($("pts-p3a"), ["p3a"]); if ($("pts-p3b")) ptsLabel($("pts-p3b"), ["p3b"]);
+  ptsLabel($("pts-p4"), ["p4a", "p4b"]); ptsLabel($("pts-p4a"), ["p4a"]); ptsLabel($("pts-p4b"), ["p4b"]);
+  ptsLabel($("pts-p5"), ["p5"]); ptsLabel($("pts-p6"), ["p6"]);
+  renderSummary();
+}
+function renderSummary() {
+  $("sum-who").innerHTML = `<b>${escapeHTML(S.name || "(type your name at the top)")}</b> &nbsp; Period ${escapeHTML(S.period || "?")}`;
+  let h = "<tr><th>Problem</th><th>Points</th><th>Tries</th></tr>"; let total = 0;
+  Object.keys(POINTS).forEach((k) => {
+    const got = S.done[k] ? POINTS[k] : 0; total += got;
+    h += `<tr><td>${LABELS[k]}</td><td>${S.done[k] ? "✔ " : ""}${got} / ${POINTS[k]}</td><td>${S.tries[k] || 0}</td></tr>`;
+  });
+  $("sum-table").innerHTML = h;
+  $("sum-total").textContent = "Earned back: " + total + " / 10";
+  const times = Object.values(S.doneAt).sort();
+  $("sum-time").textContent = "Screenshot taken " + new Date().toLocaleString() + (times.length ? " · last point earned " + new Date(times[times.length - 1]).toLocaleString() : "");
+}
+function escapeHTML(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+setInterval(() => renderSummary(), 30000);
+$("who-name").value = S.name; $("who-period").value = S.period;
+$("who-name").oninput = (e) => { S.name = e.target.value; save(); };
+$("who-period").oninput = (e) => { S.period = e.target.value; save(); };
+$("reset-all").onclick = () => { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); };
+
+/* ---------------- start ---------------- */
+document.querySelectorAll("[data-sb]").forEach((el) => sb(el, SB[el.dataset.sb]));
+p1Render(); p1New("a"); p1New("b");
+p2Learn(); p2New();
+p3Learn(); p3New("a"); p3New("b");
+p4Learn(); p4New();
+p5Builder(P5_LEARN, $("p5-learn-slots"), $("p5-learn-sb"), p5LearnPick);
+p5New();
+p6New();
+updatePts();
+
+/* ---------------- self test (?selftest) ---------------- */
+if (location.search.includes("selftest")) {
+  const R = [];
+  const eq = (name, a, b) => R.push((JSON.stringify(a) === JSON.stringify(b) ? "PASS " : "FAIL ") + name + " got " + JSON.stringify(a) + " want " + JSON.stringify(b));
+  eq("mys catapult", mysWord("catapult"), "ccattappulltt");
+  eq("mys try", mysWord("try"), "ttrryy");
+  eq("mys words test", mysWordsKeep(P2_LEARN, 5), ["iron", "oak", "catapult"]);
+  eq("p5 learn right", p5Eval(P5_LEARN, { left: "first", right: "letter", list: "words" }, P5_LEARN.tests[0]), ["giraffe", "girl", "goat"]);
+  eq("p5 learn swapped", p5Eval(P5_LEARN, { left: "letter", right: "empty", list: "words" }, P5_LEARN.tests[0]), []);
+  eq("p5 learn words-in-test errs", !!p5Eval(P5_LEARN, { left: "firstWords", right: "letter", list: "words" }, P5_LEARN.tests[0]).err, true);
+  const F0 = P5_FRESH[0];
+  eq("p5 nums right", p5Eval(F0, { left: "empty", op: ">", right: "limit", list: "nums" }, F0.tests[0]), [12, 30, 15]);
+  eq("p5 nums flipped ok", p5Eval(F0, { left: "limit", op: "<", right: "empty", list: "nums" }, F0.tests[0]), [12, 30, 15]);
+  eq("p5 nums list errs", !!p5Eval(F0, { left: "nums", op: ">", right: "limit", list: "nums" }, F0.tests[0]).err, true);
+  const F1 = P5_FRESH[1];
+  eq("p5 len right", p5Eval(F1, { left: "len", op: "=", right: "n", list: "words" }, F1.tests[0]), ["cat", "dog"]);
+  const F2 = P5_FRESH[2];
+  eq("p5 vowel right", p5Eval(F2, { left: "first", list: "words" }, F2.tests[0]), ["apple", "igloo", "egg"]);
+  p6 = { k: 2 }; eq("p6 test example", p6Run(["keep", "map", "combine"], [5, "a", "b", 4, "c", 1050, ":)"]).v, 2118);
+  eq("p6 map first errs", !!p6Run(["map", "keep", "combine"], [5, "a"]).err, true);
+  // drive the real UI: one wrong answer, then right answers everywhere
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  S = { name: "Test", period: "1", done: {}, tries: {}, doneAt: {} };
+  p6 = null; p6New();
+  const before = p1a; $("p1a-ans").value = "zzz"; $("p1a-check").click();
+  eq("wrong answer swaps word", p1a !== before && !S.done.p1a && S.tries.p1a === 1, true);
+  $("p1a-ans").value = mysWord(p1a).toUpperCase() + " "; $("p1a-check").click();
+  $("p1b-ans").value = '"' + mysWord(p1b) + '"'; $("p1b-check").click();
+  [...$("p2-chips").children].forEach((c) => { if (p2.ans.includes(c.textContent)) c.click(); }); $("p2-check").click();
+  ["a", "b"].forEach((slot, i) => { const card = $("p3-earn").children[i]; card.querySelector(`button[data-a="${p3[slot][1]}"]`).click(); });
+  [...$("p4-bugs").children].forEach((l) => { if (l.dataset.ok) l.querySelector("input").checked = true; }); $("p4a-check").click();
+  const pickOpt = (slotsEl, row, idx) => slotsEl.querySelectorAll(".slot-opts")[row].children[idx].click();
+  pickOpt($("p4-slots"), 0, 0); pickOpt($("p4-slots"), 1, p4.goodR); $("p4b-check").click();
+  const sp = p5; const keys = (o) => Object.keys(o);
+  const want = { 0: { left: "empty", op: ">", right: "limit", list: "nums" }, 1: { left: "len", op: "=", right: "n", list: "words" }, 2: { left: "first", list: "words" } }[P5_FRESH.indexOf(sp)];
+  const rows = $("p5-earn-slots").querySelectorAll(".slot-opts"); let r = 0;
+  pickOpt($("p5-earn-slots"), r++, keys(sp.left).indexOf(want.left));
+  if (sp.ops[0] !== "vowel") { if (sp.ops.length > 1) pickOpt($("p5-earn-slots"), r++, sp.ops.indexOf(want.op)); pickOpt($("p5-earn-slots"), r++, keys(sp.right).indexOf(want.right)); }
+  pickOpt($("p5-earn-slots"), r++, keys(sp.listT).indexOf(want.list));
+  $("p5-check").click();
+  pickOpt($("p6-slots"), 0, 2); pickOpt($("p6-slots"), 1, 1); pickOpt($("p6-slots"), 2, 0); $("p6-check").click();
+  eq("all points earned", Object.keys(POINTS).filter((k) => !S.done[k]), []);
+  eq("summary total", $("sum-total").textContent, "Earned back: 10 / 10");
+  document.title = "SELFTEST " +(R.every((r) => r.startsWith("PASS")) ? "ALL PASS" : "FAILURES");
+  const pre = document.createElement("pre"); pre.id = "selftest"; pre.textContent = R.join("\n"); document.body.prepend(pre);
+}
+</script>
+</body>
+</html>
