@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sticker Swap</title>
+<style>
+:root {
+  --bg: #f4f5f7; --card: #ffffff; --ink: #1d2330; --muted: #5b6475; --line: #d9dde5;
+  --accent: #2f6fdb; --good: #1f8a4c; --good-bg: #e6f5ec; --bad: #b3261e; --bad-bg: #fdecea;
+  --mine: #7b4fd6; --mine-bg: #f1ebfd; --theirs: #d9822b; --theirs-bg: #fdf1e3;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+header { background: #1d2330; color: #fff; padding: 18px 16px; }
+header h1 { margin: 0; font-size: 1.5rem; }
+header p { margin: 4px 0 0; color: #c9cfdb; }
+main { max-width: 960px; margin: 0 auto; padding: 16px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 0 0 18px; }
+.card h2 { margin: 0 0 4px; font-size: 1.25rem; }
+.card h3 { margin: 16px 0 6px; font-size: 1.05rem; }
+.sub { color: var(--muted); margin: 0 0 10px; }
+.status { float: right; font-size: .9rem; font-weight: 600; color: var(--muted); }
+.status.done { color: var(--good); }
+.blocks-wrap { overflow-x: auto; padding: 6px 0; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+button { font: inherit; border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 7px 14px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+button:disabled { opacity: .5; cursor: default; }
+.albums { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 10px 0; }
+.album { border-radius: 10px; padding: 10px; }
+.album.mine { background: var(--mine-bg); border: 2px solid var(--mine); }
+.album.theirs { background: var(--theirs-bg); border: 2px solid var(--theirs); }
+.album.result { background: #fff; border: 2px dashed var(--line); grid-column: 1 / -1; min-height: 70px; }
+.album h4 { margin: 0 0 6px; font-size: .95rem; }
+.album h4 .mono { font-weight: 700; }
+.stickers { display: flex; flex-wrap: wrap; gap: 8px; }
+.sticker { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 74px; height: 74px;
+  background: #fff; border: 2px solid var(--line); border-radius: 12px; font-size: 1.9rem; line-height: 1; user-select: none; transition: transform .15s; }
+.sticker small { font-size: .7rem; color: var(--muted); margin-top: 4px; font-family: ui-monospace, Menlo, Consolas, monospace; }
+button.sticker { padding: 0; cursor: pointer; }
+.sticker.on { border-color: var(--accent); background: #e8eefc; transform: scale(1.05); }
+.sticker.now { border-color: #e0a800; box-shadow: 0 0 0 3px #ffe58a; }
+.sticker.kept { border-color: var(--good); background: var(--good-bg); }
+.sticker.dropped { opacity: .35; }
+.sticker.found { border-color: var(--good); box-shadow: 0 0 0 3px #b6e3c7; }
+.sticker.missed { border-color: var(--bad); border-style: dashed; }
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+table.trace { border-collapse: collapse; margin: 8px 0; font-size: .95rem; }
+table.trace th, table.trace td { border: 1px solid var(--line); padding: 4px 10px; text-align: center; }
+table.trace th { background: #f0f2f6; }
+table.trace tr.now td { background: #fff7d6; }
+.msg { margin: 10px 0 0; padding: 8px 12px; border-radius: 8px; }
+.msg.good { background: var(--good-bg); color: #13502d; }
+.msg.bad { background: var(--bad-bg); color: #7a1a14; }
+.msg.info { background: #eef1f6; }
+.slots { display: grid; grid-template-columns: max-content 1fr; gap: 8px 12px; align-items: center; margin: 10px 0; }
+.slots label { font-weight: 600; }
+.slot-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.slot-opts .opt { cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 2px; background: #f6f7fa; }
+.slot-opts .opt.on { border-color: var(--accent); background: #e8eefc; }
+.slot-opts .plain { display: inline-block; padding: 6px 10px; font-family: ui-monospace, Menlo, Consolas, monospace; }
+.slot-opts .hole { display: inline-block; width: 26px; height: 16px; border-radius: 9px; background: #fff; border: 1px solid #999; vertical-align: middle; }
+.goal { font-weight: 600; padding: 8px 12px; background: #fff7e0; border-radius: 8px; margin: 8px 0; }
+.choices { display: grid; gap: 8px; margin: 8px 0; }
+.choices .opt { cursor: pointer; border: 2px solid var(--line); border-radius: 8px; padding: 6px 8px; background: #fff; display: flex; align-items: center; gap: 10px; }
+.choices .opt.on { border-color: var(--accent); background: #e8eefc; }
+.choices .letter { font-weight: 700; width: 1.5em; }
+.progress { display: flex; gap: 6px; margin: 6px 0; }
+.progress span { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: inline-flex; align-items: center; justify-content: center; font-size: .8rem; }
+.progress span.ok { background: var(--good); border-color: var(--good); color: #fff; }
+.who { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+input[type=text] { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; min-width: 200px; }
+#summary { border: 3px solid var(--ink); }
+#summary table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+#summary td, #summary th { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; }
+details { margin: 8px 0; }
+summary { cursor: pointer; color: var(--accent); }
+@media (max-width: 640px) { .albums { grid-template-columns: 1fr; } .slots { grid-template-columns: 1fr; } .sticker { width: 64px; height: 64px; font-size: 1.6rem; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Sticker Swap: Matching Two Lists</h1>
+  <p>You and Jay both collect stickers. Use keep to find the stickers you both have, and the ones only one of you has.</p>
+</header>
+<main>
+
+<div class="card">
+  <div class="who">
+    <label>Name <input type="text" id="who-name" autocomplete="off"></label>
+    <label>Period <input type="text" id="who-period" autocomplete="off" style="min-width:70px;width:70px"></label>
+  </div>
+  <p class="sub" style="margin-top:10px">Your stickers are in a list called <span class="mono">mine</span>. Jay's are in <span class="mono">theirs</span>.
+  There are six levels. Do them in order. Your progress is saved in this browser.</p>
+  <div class="blocks-wrap" id="intro-lists"></div>
+</div>
+
+<!-- LEVEL 1 -->
+<div class="card" id="l1">
+  <span class="status" id="st-l1"></span>
+  <h2>Level 1: Stickers we BOTH have</h2>
+  <p class="sub">Keep asks a question about each sticker in <span class="mono">mine</span>, one at a time. Here the question is: "Does Jay's list contain this sticker?"</p>
+  <div class="blocks-wrap" id="l1-sb"></div>
+  <p style="margin:6px 0"><b>Predict first.</b> Click the stickers in <span class="mono">mine</span> you think keep will report. Then step through it.</p>
+  <div class="albums" id="l1-albums"></div>
+  <div class="row"><button id="l1-predict" class="primary">Lock in my guess</button></div>
+  <div id="l1-predict-msg"></div>
+  <div id="l1-stepper" hidden>
+    <div class="row" style="margin:10px 0">
+      <button id="l1-next" class="primary">Next sticker</button><button id="l1-all">Show all</button><button id="l1-reset">Start over</button>
+    </div>
+    <div style="overflow-x:auto"><table class="trace" id="l1-table"></table></div>
+    <div id="l1-msg"></div>
+  </div>
+</div>
+
+<!-- LEVEL 2 -->
+<div class="card" id="l2">
+  <span class="status" id="st-l2"></span>
+  <h2>Level 2: Build the BOTH block</h2>
+  <p class="sub">Put the pieces in the right spots. Click Run to try it on the stickers. It has to work on a second pair of albums too.</p>
+  <div class="goal">Goal: report the stickers that are in BOTH albums.</div>
+  <div class="slots" id="l2-slots"></div>
+  <div class="blocks-wrap" id="l2-sb"></div>
+  <div class="row"><button id="l2-run" class="primary">Run</button></div>
+  <div id="l2-out"></div>
+</div>
+
+<!-- LEVEL 3 -->
+<div class="card" id="l3">
+  <span class="status" id="st-l3"></span>
+  <h2>Level 3: Stickers only I have</h2>
+  <p class="sub">Trade time. Jay wants the stickers you have that Jay does NOT have. Same keep, same question, but wrapped in <b>not</b>, so the answer flips.</p>
+  <div class="blocks-wrap" id="l3-sb"></div>
+  <div class="albums" id="l3-albums"></div>
+  <p style="margin:6px 0"><b>Predict first.</b> Click the stickers in <span class="mono">mine</span> you think keep will report.</p>
+  <div class="row"><button id="l3-predict" class="primary">Lock in my guess</button></div>
+  <div id="l3-predict-msg"></div>
+  <div id="l3-stepper" hidden>
+    <div class="row" style="margin:10px 0">
+      <button id="l3-next" class="primary">Next sticker</button><button id="l3-all">Show all</button><button id="l3-reset">Start over</button>
+    </div>
+    <div style="overflow-x:auto"><table class="trace" id="l3-table"></table></div>
+    <div id="l3-msg"></div>
+  </div>
+</div>
+
+<!-- LEVEL 4 -->
+<div class="card" id="l4">
+  <span class="status" id="st-l4"></span>
+  <h2>Level 4: Build it for any goal</h2>
+  <p class="sub">Now you choose whether to use <b>not</b>. Get three goals right to finish the level.</p>
+  <div class="progress" id="l4-progress"></div>
+  <div class="goal" id="l4-goal"></div>
+  <div class="slots" id="l4-slots"></div>
+  <div class="blocks-wrap" id="l4-sb"></div>
+  <div class="row"><button id="l4-run" class="primary">Run</button></div>
+  <div id="l4-out"></div>
+</div>
+
+<!-- LEVEL 5 -->
+<div class="card" id="l5">
+  <span class="status" id="st-l5"></span>
+  <h2>Level 5: What does it report?</h2>
+  <p class="sub">Read the block. Click the stickers it reports, then check. Get four right to finish the level.</p>
+  <div class="progress" id="l5-progress"></div>
+  <div class="blocks-wrap" id="l5-sb"></div>
+  <div class="albums" id="l5-albums"></div>
+  <div class="row"><button id="l5-check" class="primary">Check</button></div>
+  <div id="l5-msg"></div>
+</div>
+
+<!-- LEVEL 6 -->
+<div class="card" id="l6">
+  <span class="status" id="st-l6"></span>
+  <h2>Level 6: Not just stickers</h2>
+  <p class="sub">Same two blocks, different lists. Pick the block that answers the question. Get four right to finish.</p>
+  <div class="progress" id="l6-progress"></div>
+  <div class="goal" id="l6-goal"></div>
+  <div class="choices" id="l6-choices"></div>
+  <div class="row"><button id="l6-check" class="primary">Check</button></div>
+  <div id="l6-msg"></div>
+</div>
+
+<div class="card" id="summary">
+  <h2>My progress</h2>
+  <div id="sum-who"></div>
+  <table id="sum-table"></table>
+  <p class="sub" id="sum-time"></p>
+  <details><summary>Start over (clears everything on this page)</summary><button id="reset-all">Yes, clear my progress</button></details>
+</div>
+
+</main>
+<script src="snapblocks.min.js"></script>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function sb(el, text, scale) {
+  el.innerHTML = ""; const pre = document.createElement("pre"); pre.className = "blocks"; pre.textContent = text; el.appendChild(pre);
+  try { snapblocks.renderElement(pre, { style: "snap", scale: scale || 1.25 }); } catch (e) {}
+}
+function msg(el, kind, html) { el.innerHTML = '<div class="msg ' + kind + '">' + html + "</div>"; }
+const sbList = (xs) => "(list " + xs.map((w) => "[" + w + "]").join(" ") + " @<:>)";
+
+/* ---------- stickers ---------- */
+const EMOJI = { cat: "🐱", dog: "🐶", octopus: "🐙", pizza: "🍕", rocket: "🚀", taco: "🌮", star: "⭐", ghost: "👻", frog: "🐸",
+  robot: "🤖", donut: "🍩", whale: "🐳", alien: "👽", unicorn: "🦄", cactus: "🌵", dragon: "🐉", panda: "🐼", rainbow: "🌈" };
+const NAMES = Object.keys(EMOJI);
+function stickerEl(name, asButton) {
+  const el = document.createElement(asButton ? "button" : "span");
+  el.className = "sticker"; el.dataset.name = name; el.innerHTML = EMOJI[name] + "<small>" + name + "</small>";
+  if (asButton) { el.type = "button"; el.onclick = () => el.classList.toggle("on"); el.setAttribute("aria-label", name); }
+  return el;
+}
+function album(kind, title, names, clickable) {
+  const d = document.createElement("div"); d.className = "album " + kind;
+  d.innerHTML = `<h4>${title}</h4>`; const s = document.createElement("div"); s.className = "stickers";
+  names.forEach((n) => s.appendChild(stickerEl(n, clickable))); d.appendChild(s); return d;
+}
+function makePair(nMine, nTheirs, overlap) {
+  const pool = shuffle(NAMES); const both = pool.slice(0, overlap);
+  const mineOnly = pool.slice(overlap, overlap + nMine - overlap); const theirsOnly = pool.slice(nMine, nMine + nTheirs - overlap);
+  return { mine: shuffle([...both, ...mineOnly]), theirs: shuffle([...both, ...theirsOnly]) };
+}
+
+/* ---------- the four keeps ---------- */
+// spec = { from: "mine"|"theirs", other: "mine"|"theirs", item: "empty"|..., not: bool }
+function runKeep(spec, env) {
+  const from = env[spec.from];
+  if (!Array.isArray(from)) return { err: "keep needs a list in the from spot" };
+  const out = [];
+  for (const it of from) {
+    const listToSearch = env[spec.other];
+    const what = spec.item === "empty" ? it : env[spec.item];
+    let ans = listToSearch.includes(what);
+    if (spec.not) ans = !ans;
+    if (ans) out.push(it);
+  }
+  return out;
+}
+const keepText = (spec, names) => {
+  const n = names || { mine: "mine", theirs: "theirs" };
+  const item = spec.item === "empty" ? "()" : spec.item ? `(${n[spec.item] || spec.item})` : "[ ]";
+  const other = spec.other ? `(${n[spec.other]})` : "[ ]";
+  const from = spec.from ? `(${n[spec.from]})` : "[ ]";
+  let test = `<${other} contains ${item}>`;
+  if (spec.not) test = `<not ${test}>`;
+  return `(keep items (${test} @>) from ${from})`;
+};
+const sameSet = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
+
+/* ---------- saved state ---------- */
+const KEY = "bcs-sticker-swap-v1";
+let S = { name: "", period: "", done: {}, l4: 0, l5: 0, l6: 0, tries: {} };
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} renderSummary(); }
+const LEVELS = { l1: "1  stickers we both have", l2: "2  build the both block", l3: "3  stickers only I have", l4: "4  build it for any goal", l5: "5  what does it report?", l6: "6  not just stickers" };
+function finish(l) { if (!S.done[l]) { S.done[l] = new Date().toISOString(); save(); } status(); }
+function tried(l) { S.tries[l] = (S.tries[l] || 0) + 1; save(); }
+function status() {
+  Object.keys(LEVELS).forEach((l) => { const el = $("st-" + l); el.textContent = S.done[l] ? "✔ done" : "not done yet"; el.classList.toggle("done", !!S.done[l]); });
+  prog("l4-progress", S.l4, 3); prog("l5-progress", S.l5, 4); prog("l6-progress", S.l6, 4);
+}
+function prog(id, n, max) { $(id).innerHTML = Array.from({ length: max }, (_, i) => `<span class="${i < n ? "ok" : ""}">${i < n ? "✔" : i + 1}</span>`).join(""); }
+
+/* ---------- slot picker ---------- */
+function addSlot(container, label, options, onPick, preset) {
+  const lab = document.createElement("label"); lab.textContent = label;
+  const box = document.createElement("div"); box.className = "slot-opts";
+  options.forEach(([key, text]) => {
+    const o = document.createElement("span"); o.className = "opt"; o.tabIndex = 0; o.dataset.key = key;
+    if (text.startsWith("!")) o.innerHTML = '<span class="plain">' + text.slice(1) + "</span>"; else sb(o, text, 1.1);
+    const choose = () => { box.querySelectorAll(".opt").forEach((x) => x.classList.remove("on")); o.classList.add("on"); onPick(key); };
+    o.onclick = choose; o.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choose(); } };
+    if (preset === key) o.classList.add("on");
+    box.appendChild(o);
+  });
+  container.appendChild(lab); container.appendChild(box);
+}
+const HOLE = "!empty slot <span class=\"hole\"></span>";
+
+/* ---------- shared stepper for levels 1 and 3 ---------- */
+function predictAndStep(L, pair, spec) {
+  sb($(L + "-sb"), keepText(spec));
+  const albums = $(L + "-albums"); albums.innerHTML = "";
+  const mineAlbum = album("mine", 'My stickers: <span class="mono">mine</span>', pair.mine, true);
+  albums.appendChild(mineAlbum);
+  albums.appendChild(album("theirs", 'Jay\'s stickers: <span class="mono">theirs</span>', pair.theirs, false));
+  const answer = runKeep(spec, pair);
+  $(L + "-predict").onclick = () => {
+    const guess = [...mineAlbum.querySelectorAll(".sticker.on")].map((s) => s.dataset.name);
+    const ok = sameSet(guess, answer); tried(L);
+    msg($(L + "-predict-msg"), ok ? "good" : "info", ok ? "CORRECT - nice prediction. Step through it to see why." : "Not quite. Step through it to see each answer.");
+    $(L + "-stepper").hidden = false; draw();
+  };
+  let step = 0;
+  const rows = pair.mine.map((it) => {
+    const has = pair.theirs.includes(it); const ans = spec.not ? !has : has;
+    return { it, has, ans };
+  });
+  function draw() {
+    let h = `<tr><th>sticker in mine</th><th>what keep asks</th><th>theirs contains it?</th>${spec.not ? "<th>not that</th>" : ""}<th>kept?</th></tr>`;
+    rows.slice(0, step).forEach((r, k) => {
+      h += `<tr class="${k === step - 1 ? "now" : ""}"><td>${EMOJI[r.it]} ${r.it}</td><td class="mono">${spec.not ? "not (" : ""}theirs contains ${r.it}${spec.not ? ")" : ""}</td>` +
+           `<td class="mono">${r.has}</td>${spec.not ? `<td class="mono"><b>${r.ans}</b></td>` : ""}<td>${r.ans ? "<b>kept</b>" : "dropped"}</td></tr>`;
+    });
+    $(L + "-table").innerHTML = h;
+    mineAlbum.querySelectorAll(".sticker").forEach((s, k) => {
+      s.classList.remove("now", "kept", "dropped");
+      if (k < step) s.classList.add(rows[k].ans ? "kept" : "dropped");
+      if (k === step - 1) s.classList.add("now");
+    });
+    if (step >= rows.length) {
+      msg($(L + "-msg"), "good", `Keep reports <b>[${answer.map((n) => EMOJI[n] + " " + n).join(", ")}]</b>. ` +
+        (spec.not ? "These are the stickers Jay does not have, so they are the ones you can trade." : "These are the stickers you both have. In the ESP game, these are your matches."));
+      finish(L);
+    } else $(L + "-msg").innerHTML = "";
+    $(L + "-next").disabled = step >= rows.length;
+  }
+  $(L + "-next").onclick = () => { step++; draw(); };
+  $(L + "-all").onclick = () => { step = rows.length; draw(); };
+  $(L + "-reset").onclick = () => { step = 0; draw(); };
+}
+
+/* ---------- level 2 and 4 builder ---------- */
+function builder(L, goal, opts) {
+  const spec = { from: null, other: null, item: null, not: opts.allowNot ? null : false };
+  const slots = $(L + "-slots"); slots.innerHTML = "";
+  const draw = () => sb($(L + "-sb"), keepText(spec));
+  if (opts.allowNot) addSlot(slots, "Flip the answer?", [["no", "!no"], ["yes", "<not <>>"]], (k) => { spec.not = k === "yes"; draw(); });
+  addSlot(slots, "Search this list", [["mine", "(mine)"], ["theirs", "(theirs)"]], (k) => { spec.other = k; draw(); });
+  addSlot(slots, "For this", [["empty", HOLE], ["mine", "(mine)"], ["theirs", "(theirs)"]], (k) => { spec.item = k; draw(); });
+  addSlot(slots, "Keep from", [["mine", "(mine)"], ["theirs", "(theirs)"]], (k) => { spec.from = k; draw(); });
+  draw();
+  return spec;
+}
+const GOALS = {
+  both: { text: "Report the stickers that are in BOTH albums.", f: (e) => e.mine.filter((x) => e.theirs.includes(x)), order: false },
+  onlyMine: { text: "Report the stickers that are in mine but NOT in theirs.", f: (e) => e.mine.filter((x) => !e.theirs.includes(x)), order: false },
+  onlyTheirs: { text: "Report the stickers that are in theirs but NOT in mine.", f: (e) => e.theirs.filter((x) => !e.mine.includes(x)), order: false },
+};
+function judge(spec, goalKey, pairs) {
+  if (spec.from === null || spec.other === null || spec.item === null || spec.not === null) return { bad: "Pick something for every spot first." };
+  for (const env of pairs) {
+    const want = GOALS[goalKey].f(env);
+    const got = runKeep(spec, env);
+    if (!sameSet(got, want)) {
+      let why = "";
+      if (spec.item !== "empty") why = `The "for this" spot is the whole list <span class="mono">${spec.item}</span>, not one sticker. A list is never inside the other list, so the answer is the same for every sticker. Use the empty slot so each sticker gets dropped in.`;
+      else if (spec.other === spec.from) why = `You are searching the same list you keep from, so every sticker finds itself. Search the OTHER list.`;
+      else if (goalKey === "both") why = `Both stickers have to be in the other list, so do not flip the answer.`;
+      else why = `Look at which list you keep from, and whether the answer needs to flip.`;
+      return { bad: why, got, want, env };
+    }
+  }
+  return { ok: true, got: runKeep(spec, pairs[0]) };
+}
+function showRun(outEl, res, env, goalKey) {
+  const got = runKeep(res.spec, env);
+  const want = GOALS[goalKey].f(env);
+  const a = document.createElement("div"); a.className = "albums";
+  a.appendChild(album("mine", 'mine', env.mine, false));
+  a.appendChild(album("theirs", 'theirs', env.theirs, false));
+  const r = album("result", "Your block reports:", got, false);
+  if (!got.length) r.querySelector(".stickers").innerHTML = '<span class="sub">an empty list</span>';
+  a.appendChild(r);
+  outEl.innerHTML = ""; outEl.appendChild(a);
+  return { got, want };
+}
+
+/* LEVEL 2 */
+let l2Spec, l2Pairs;
+function l2Init() {
+  l2Pairs = [makePair(6, 6, 3), makePair(5, 7, 2)];
+  l2Spec = builder("l2", "both", { allowNot: false });
+}
+$("l2-run").onclick = () => {
+  const res = judge(l2Spec, "both", l2Pairs); const out = $("l2-out");
+  if (res.bad && !res.env) { msg(out, "bad", res.bad); return; }
+  tried("l2");
+  showRun(out, { spec: l2Spec }, res.env || l2Pairs[0], "both");
+  const m = document.createElement("div"); out.appendChild(m);
+  if (res.ok) {
+    msg(m, "good", "CORRECT - it works on both pairs of albums. " +
+      (l2Spec.from === "theirs" ? "You kept from theirs, which also works: same stickers, in Jay's order." : "This is the matches block from the ESP game."));
+    finish("l2");
+  } else msg(m, "bad", "NOT QUITE - " + res.bad);
+};
+
+/* LEVEL 4 */
+let l4Spec, l4Goal, l4Pairs;
+function l4New() {
+  const order = ["onlyMine", "onlyTheirs", "both", "onlyMine", "onlyTheirs"];
+  l4Goal = S.done.l4 ? pick(Object.keys(GOALS)) : order[S.l4 % order.length];
+  l4Pairs = [makePair(6, 6, 3), makePair(6, 5, 2)];
+  $("l4-goal").textContent = "Goal: " + GOALS[l4Goal].text;
+  l4Spec = builder("l4", l4Goal, { allowNot: true });
+  $("l4-out").innerHTML = "";
+}
+$("l4-run").onclick = () => {
+  const res = judge(l4Spec, l4Goal, l4Pairs); const out = $("l4-out");
+  if (res.bad && !res.env) { msg(out, "bad", res.bad); return; }
+  tried("l4");
+  showRun(out, { spec: l4Spec }, res.env || l4Pairs[0], l4Goal);
+  const m = document.createElement("div"); out.appendChild(m);
+  if (res.ok) {
+    S.l4 = Math.min(3, S.l4 + 1); save(); if (S.l4 >= 3) finish("l4"); status();
+    msg(m, "good", "CORRECT - it works on both pairs. " + (S.l4 < 3 ? '<button id="l4-again">Next goal</button>' : "Level done."));
+    const b = $("l4-again"); if (b) b.onclick = l4New;
+  } else msg(m, "bad", "NOT QUITE - " + res.bad);
+};
+
+/* LEVEL 5 */
+const L5_SPECS = [
+  { from: "mine", other: "theirs", item: "empty", not: false },
+  { from: "mine", other: "theirs", item: "empty", not: true },
+  { from: "theirs", other: "mine", item: "empty", not: false },
+  { from: "theirs", other: "mine", item: "empty", not: true },
+];
+let l5;
+function l5New() {
+  const spec = pick(L5_SPECS.filter((s) => !l5 || s !== l5.spec));
+  const pair = makePair(5, 5, pick([2, 3]));
+  l5 = { spec, pair, answer: runKeep(spec, pair) };
+  sb($("l5-sb"), keepText(spec));
+  const a = $("l5-albums"); a.innerHTML = "";
+  a.appendChild(album("mine", '<span class="mono">mine</span>', pair.mine, true));
+  a.appendChild(album("theirs", '<span class="mono">theirs</span>', pair.theirs, true));
+}
+$("l5-check").onclick = () => {
+  const picked = [...$("l5-albums").querySelectorAll(".sticker.on")];
+  const names = picked.map((p) => p.dataset.name);
+  const fromAlbum = $("l5-albums").children[l5.spec.from === "mine" ? 0 : 1];
+  const uniq = [...new Set(names)];
+  tried("l5");
+  const fromRight = picked.every((p) => fromAlbum.contains(p));
+  const ok = fromRight && sameSet(uniq, l5.answer) && names.length === uniq.length;
+  $("l5-albums").querySelectorAll(".sticker").forEach((s) => {
+    const inAns = l5.answer.includes(s.dataset.name) && fromAlbum.contains(s);
+    if (inAns) s.classList.add(s.classList.contains("on") ? "found" : "missed");
+  });
+  if (ok) {
+    S.l5 = Math.min(4, S.l5 + 1); save(); if (S.l5 >= 4) finish("l5"); status();
+    msg($("l5-msg"), "good", "CORRECT - " + (S.l5 < 4 ? '<button id="l5-again">Next one</button>' : "Level done. <button id=\"l5-again\">Keep practicing</button>"));
+  } else {
+    let why = `It reports [${l5.answer.join(", ") || "nothing"}].`;
+    if (!fromRight) why += ` Keep only reports stickers from the list after <b>from</b>, which is <span class="mono">${l5.spec.from}</span>, so click in that album.`;
+    else if (l5.spec.not) why += " The not flips each answer, so it keeps the stickers the other list does NOT have.";
+    else why += " It keeps the stickers the other list also has.";
+    msg($("l5-msg"), "bad", "NOT QUITE - " + why + ' The green outlines are the right ones. <button id="l5-again">Try a new one</button>');
+  }
+  $("l5-again").onclick = () => { $("l5-msg").innerHTML = ""; l5New(); };
+};
+
+/* LEVEL 6 */
+const L6 = [
+  { q: "Which songs are on BOTH your playlist and your friend's playlist?", a: "my songs", b: "friend's songs", goal: "both" },
+  { q: "Which kids signed up for the field trip but have NOT turned in a permission slip?", a: "signed up", b: "slips in", goal: "onlyA" },
+  { q: "Which of your guesses are on the secret word list?", a: "my guesses", b: "secret words", goal: "both" },
+  { q: "Which groceries on the shopping list are NOT already in the fridge?", a: "shopping list", b: "fridge", goal: "onlyA" },
+  { q: "Which classes do you and your best friend BOTH have?", a: "my classes", b: "their classes", goal: "both" },
+  { q: "Which assignments are you still missing? (all assignments that are NOT in the turned-in list)", a: "assignments", b: "turned in", goal: "onlyA" },
+  { q: "Which players were on the team last year AND are on it again this year?", a: "last year", b: "this year", goal: "both" },
+  { q: "Which words in the essay are NOT in the dictionary? (likely typos)", a: "essay words", b: "dictionary", goal: "onlyA" },
+];
+let l6;
+function l6New() {
+  const s = pick(L6.filter((x) => !l6 || x !== l6.s));
+  const names = { a: s.a, b: s.b };
+  const opts = shuffle([
+    { key: "both", spec: { from: "a", other: "b", item: "empty", not: false } },
+    { key: "onlyA", spec: { from: "a", other: "b", item: "empty", not: true } },
+    { key: "wrongList", spec: { from: "a", other: "a", item: "empty", not: false } },
+    { key: "wholeList", spec: { from: "a", other: "b", item: "a", not: false } },
+  ]);
+  l6 = { s, opts, chosen: null };
+  $("l6-goal").textContent = s.q;
+  const c = $("l6-choices"); c.innerHTML = ""; $("l6-msg").innerHTML = "";
+  opts.forEach((o, i) => {
+    const d = document.createElement("div"); d.className = "opt"; d.tabIndex = 0;
+    d.innerHTML = `<span class="letter">${"ABCD"[i]}</span><span class="b"></span>`;
+    sb(d.querySelector(".b"), keepText(o.spec, { a: s.a, b: s.b }), 1.1);
+    const choose = () => { c.querySelectorAll(".opt").forEach((x) => x.classList.remove("on")); d.classList.add("on"); l6.chosen = o; };
+    d.onclick = choose; d.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choose(); } };
+    c.appendChild(d);
+  });
+}
+const L6_WHY = {
+  both: "This keeps the items that the other list ALSO has: the ones in both.",
+  onlyA: "The not flips the answer, so this keeps the items the other list does NOT have.",
+  wrongList: "This searches the same list it keeps from, so every item finds itself and nothing is dropped.",
+  wholeList: "This asks about the whole list instead of one item (no empty slot), so it gives the same answer for every item.",
+};
+$("l6-check").onclick = () => {
+  if (!l6.chosen) { msg($("l6-msg"), "bad", "Pick one of the blocks first."); return; }
+  tried("l6");
+  const ok = l6.chosen.key === l6.s.goal;
+  if (ok) {
+    S.l6 = Math.min(4, S.l6 + 1); save(); if (S.l6 >= 4) finish("l6"); status();
+    msg($("l6-msg"), "good", "CORRECT - " + L6_WHY[l6.chosen.key] + ' <button id="l6-again">' + (S.l6 < 4 ? "Next one" : "Keep practicing") + "</button>");
+  } else msg($("l6-msg"), "bad", "NOT QUITE - " + L6_WHY[l6.chosen.key] + ' <button id="l6-again">Try a new one</button>');
+  $("l6-again").onclick = l6New;
+};
+
+/* ---------- summary ---------- */
+function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function renderSummary() {
+  $("sum-who").innerHTML = `<b>${esc(S.name || "(type your name at the top)")}</b> &nbsp; Period ${esc(S.period || "?")}`;
+  let h = "<tr><th>Level</th><th>Done?</th><th>Tries</th></tr>";
+  Object.keys(LEVELS).forEach((l) => { h += `<tr><td>${LEVELS[l]}</td><td>${S.done[l] ? "✔ done" : "not yet"}</td><td>${S.tries[l] || 0}</td></tr>`; });
+  const n = Object.keys(LEVELS).filter((l) => S.done[l]).length;
+  $("sum-table").innerHTML = h + `<tr><th>Total</th><th>${n} / 6 levels</th><th></th></tr>`;
+  $("sum-time").textContent = "As of " + new Date().toLocaleString();
+}
+$("who-name").value = S.name; $("who-period").value = S.period;
+$("who-name").oninput = (e) => { S.name = e.target.value; save(); };
+$("who-period").oninput = (e) => { S.period = e.target.value; save(); };
+$("reset-all").onclick = () => { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); };
+setInterval(renderSummary, 30000);
+
+/* ---------- start ---------- */
+const L1_PAIR = { mine: ["cat", "octopus", "pizza", "rocket", "ghost", "frog"], theirs: ["rocket", "dog", "cat", "taco", "frog", "star"] };
+const L3_PAIR = { mine: ["unicorn", "donut", "whale", "alien", "panda", "star"], theirs: ["star", "robot", "donut", "dragon", "panda", "cactus"] };
+sb($("intro-lists"), `set [mine v] to ${sbList(L1_PAIR.mine)}\nset [theirs v] to ${sbList(L1_PAIR.theirs)}`);
+predictAndStep("l1", L1_PAIR, { from: "mine", other: "theirs", item: "empty", not: false });
+predictAndStep("l3", L3_PAIR, { from: "mine", other: "theirs", item: "empty", not: true });
+l2Init(); l4New(); l5New(); l6New();
+status(); renderSummary();
+
+/* ---------- self test (?selftest) ---------- */
+if (location.search.includes("selftest")) {
+  const R = []; const eq = (n, a, b) => R.push((JSON.stringify(a) === JSON.stringify(b) ? "PASS " : "FAIL ") + n + " got " + JSON.stringify(a) + " want " + JSON.stringify(b));
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  S = { name: "T", period: "1", done: {}, l4: 0, l5: 0, l6: 0, tries: {} };
+  eq("both", runKeep({ from: "mine", other: "theirs", item: "empty", not: false }, L1_PAIR), ["cat", "rocket", "frog"]);
+  eq("only mine", runKeep({ from: "mine", other: "theirs", item: "empty", not: true }, L3_PAIR), ["unicorn", "whale", "alien"]);
+  eq("whole list keeps nothing", runKeep({ from: "mine", other: "theirs", item: "mine", not: false }, L1_PAIR), []);
+  eq("same list keeps all", runKeep({ from: "mine", other: "mine", item: "empty", not: false }, L1_PAIR), L1_PAIR.mine);
+  const p = makePair(6, 5, 2); eq("makePair overlap", [p.mine.length, p.theirs.length, p.mine.filter((x) => p.theirs.includes(x)).length], [6, 5, 2]);
+  // level 1 + 3 by clicking
+  ["l1", "l3"].forEach((L) => { $(L + "-predict").click(); $(L + "-all").click(); });
+  eq("l1 l3 done", [!!S.done.l1, !!S.done.l3], [true, true]);
+  // level 2 via slots: search theirs, empty, keep from mine
+  const pickOpt = (L, row, key) => [...$(L + "-slots").querySelectorAll(".slot-opts")[row].children].find((o) => o.dataset.key === key).click();
+  pickOpt("l2", 0, "theirs"); pickOpt("l2", 1, "mine"); pickOpt("l2", 2, "mine"); $("l2-run").click();
+  eq("l2 whole-list wrong", !!S.done.l2, false);
+  pickOpt("l2", 1, "empty"); $("l2-run").click(); eq("l2 done", !!S.done.l2, true);
+  // level 4: three goals
+  for (let i = 0; i < 3; i++) {
+    const g = l4Goal; const sp = g === "both" ? ["no", "theirs", "empty", "mine"] : g === "onlyMine" ? ["yes", "theirs", "empty", "mine"] : ["yes", "mine", "empty", "theirs"];
+    sp.forEach((k, r) => pickOpt("l4", r, k)); $("l4-run").click(); const b = $("l4-again"); if (b) b.click();
+  }
+  eq("l4 done", [S.l4, !!S.done.l4], [3, true]);
+  // level 5: four right
+  for (let i = 0; i < 4; i++) {
+    const fromAlbum = $("l5-albums").children[l5.spec.from === "mine" ? 0 : 1];
+    fromAlbum.querySelectorAll(".sticker").forEach((s) => { if (l5.answer.includes(s.dataset.name)) s.click(); });
+    $("l5-check").click(); $("l5-again").click();
+  }
+  eq("l5 done", [S.l5, !!S.done.l5], [4, true]);
+  // level 6: one wrong, then four right
+  l6.chosen = l6.opts.find((o) => o.key === "wrongList"); $("l6-check").click(); eq("l6 wrong no credit", S.l6, 0); $("l6-again").click();
+  for (let i = 0; i < 4; i++) { l6.chosen = l6.opts.find((o) => o.key === l6.s.goal); $("l6-check").click(); $("l6-again").click(); }
+  eq("l6 done", [S.l6, !!S.done.l6], [4, true]);
+  eq("summary", $("sum-table").textContent.includes("6 / 6 levels"), true);
+  document.title = "SELFTEST " + (R.every((r) => r.startsWith("PASS")) ? "ALL PASS" : "FAILURES");
+  const pre = document.createElement("pre"); pre.id = "selftest"; pre.textContent = R.join("\n"); document.body.prepend(pre);
+}
+</script>
+</body>
+</html>
