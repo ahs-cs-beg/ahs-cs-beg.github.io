@@ -41,6 +41,11 @@ table.trace { border-collapse: collapse; margin: 8px 0; font-size: .95rem; }
 table.trace th, table.trace td { border: 1px solid var(--line); padding: 4px 10px; text-align: center; }
 table.trace th { background: #f0f2f6; }
 table.trace tr.now td { background: #fff7d6; }
+table.trace input.cell { width: 3.2em; min-width: 0; text-align: center; padding: 4px; }
+table.trace select { font: inherit; padding: 3px; }
+table.trace td.cell-good { background: var(--good-bg); }
+table.trace td.cell-bad { background: var(--bad-bg); }
+table.trace .fix { font-size: .85rem; color: var(--bad); font-weight: 600; }
 table.trace td.mono, .mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 .chip { background: var(--chip); border: 2px solid transparent; border-radius: 999px; padding: 5px 14px; cursor: pointer;
@@ -136,9 +141,9 @@ summary { cursor: pointer; color: var(--accent); }
   <div class="learn-box">
     <span class="tag learn">Learn</span> Keep asks the question in the ring about <b>each word, one at a time</b>.
     The empty slots are where each word goes. If the answer is <b>true</b>, the word stays. If it is <b>false</b>, it is dropped.
-    <b>or</b> is true if <i>either</i> side is true. For each word below, decide: keep or drop?
+    <b>or</b> is true if <i>either</i> side is true. Fill in each row of the table, then click Check row.
     <div class="blocks-wrap" id="p2-learn-call"></div>
-    <table class="trace" id="p2-table"></table>
+    <div style="overflow-x:auto"><table class="trace" id="p2-table"></table></div>
     <div id="p2-learn-msg"></div>
   </div>
   <div class="earn-box">
@@ -433,26 +438,40 @@ const mysWordsKeep = (ws, n) => ws.filter((w) => w.length > n || isVowel(w[0]));
 function p2Learn() {
   sb($("p2-learn-def"), mysWordsDef(5));
   sb($("p2-learn-call"), mysWordsCall(P2_LEARN));
-  let h = "<tr><th>word</th><th>length</th><th>length &gt; 5?</th><th>first letter</th><th>is a vowel?</th><th>or</th><th>keep or drop?</th></tr>";
+  const tf = (c) => `<select data-c="${c}"><option value=""></option><option>true</option><option>false</option></select>`;
+  let h = "<tr><th>word</th><th>length</th><th>length &gt; 5?</th><th>first letter</th><th>is a vowel?</th><th>or</th><th>keep or drop?</th><th></th></tr>";
   P2_LEARN.forEach((w, k) => {
-    h += `<tr data-k="${k}"><td class="mono">${w}</td><td class="r" data-c="len"></td><td class="r" data-c="gt"></td><td class="r" data-c="first"></td><td class="r" data-c="v"></td><td class="r" data-c="or"></td>` +
-         `<td><button data-a="keep">keep</button> <button data-a="drop">drop</button> <span class="verdict"></span></td></tr>`;
+    h += `<tr data-k="${k}"><td class="mono">${w}</td>` +
+         `<td><input type="text" data-c="len" class="cell" maxlength="2" inputmode="numeric"></td>` +
+         `<td>${tf("gt")}</td>` +
+         `<td><input type="text" data-c="first" class="cell" maxlength="1"></td>` +
+         `<td>${tf("v")}</td><td>${tf("or")}</td>` +
+         `<td><select data-c="keep"><option value=""></option><option>keep</option><option>drop</option></select></td>` +
+         `<td><button class="rowcheck">Check row</button></td></tr>`;
   });
   $("p2-table").innerHTML = h;
-  $("p2-table").querySelectorAll("button").forEach((b) => b.onclick = () => {
+  $("p2-table").querySelectorAll(".rowcheck").forEach((b) => b.onclick = () => {
     const tr = b.closest("tr"); const w = P2_LEARN[+tr.dataset.k];
     const gt = w.length > 5, v = isVowel(w[0]), keep = gt || v;
-    const said = b.dataset.a === "keep";
-    tr.querySelector('[data-c="len"]').textContent = w.length;
-    tr.querySelector('[data-c="gt"]').textContent = gt;
-    tr.querySelector('[data-c="first"]').textContent = w[0];
-    tr.querySelector('[data-c="v"]').textContent = v;
-    tr.querySelector('[data-c="or"]').textContent = keep;
-    const vd = tr.querySelector(".verdict");
-    vd.textContent = said === keep ? "  CORRECT - " + (keep ? "kept" : "dropped") : "  NOT QUITE - " + (keep ? "kept" : "dropped") + ", see the row";
-    vd.style.color = said === keep ? "var(--good)" : "var(--bad)";
-    const allDone = [...$("p2-table").querySelectorAll('[data-c="or"]')].every((td) => td.textContent);
-    if (allDone) msgHTML($("p2-learn-msg"), "info", "The call reports <b class=\"mono\">[iron, oak, catapult]</b>. brick and stone have 5 letters, and 5 is not &gt; 5.");
+    const want = { len: String(w.length), gt: String(gt), first: w[0], v: String(v), or: String(keep), keep: keep ? "keep" : "drop" };
+    let allRight = true, blank = false;
+    for (const [c, val] of Object.entries(want)) {
+      const el = tr.querySelector(`[data-c="${c}"]`); const td = el.closest("td");
+      const got = el.value.trim().toLowerCase();
+      td.querySelectorAll(".fix").forEach((x) => x.remove());
+      td.classList.remove("cell-good", "cell-bad");
+      if (!got) { blank = true; allRight = false; continue; }
+      if (got === val) td.classList.add("cell-good");
+      else { allRight = false; td.classList.add("cell-bad"); const f = document.createElement("div"); f.className = "fix"; f.textContent = val; td.appendChild(f); }
+    }
+    tr.dataset.ok = allRight ? "1" : "";
+    const out = $("p2-learn-msg");
+    if (blank) msg(out, "bad", `Fill in every box in the ${w} row first.`);
+    else if (allRight) msg(out, "good", `CORRECT - ${w} is ${keep ? "kept" : "dropped"}.`);
+    else msg(out, "bad", `NOT QUITE - the red boxes in the ${w} row show the right answer under them.`);
+    const rows = [...$("p2-table").querySelectorAll("tr[data-k]")];
+    if (rows.every((r) => r.dataset.ok))
+      msgHTML(out, "info", "The call reports <b class=\"mono\">[iron, oak, catapult]</b>. brick and stone have 5 letters, and 5 is not &gt; 5.");
   });
 }
 let p2 = null;
@@ -904,6 +923,12 @@ if (location.search.includes("selftest")) {
   eq("p5 vowel right", p5Eval(F2, { left: "first", list: "words" }, F2.tests[0]), ["apple", "igloo", "egg"]);
   p6 = { k: 2 }; eq("p6 test example", p6Run(["keep", "map", "combine"], [5, "a", "b", 4, "c", 1050, ":)"]).v, 2118);
   eq("p6 map first errs", !!p6Run(["map", "keep", "combine"], [5, "a"]).err, true);
+  // problem 2 Learn table: a wrong row, then every row right
+  const fillRow = (k, vals) => { const tr = $("p2-table").querySelector(`tr[data-k="${k}"]`); for (const [c, v] of Object.entries(vals)) tr.querySelector(`[data-c="${c}"]`).value = v; tr.querySelector(".rowcheck").click(); return tr; };
+  const wrongRow = fillRow(1, { len: "5", gt: "true", first: "b", v: "false", or: "true", keep: "keep" });
+  eq("p2 learn wrong row marked", [wrongRow.querySelectorAll(".cell-bad").length, wrongRow.dataset.ok], [3, ""]);
+  P2_LEARN.forEach((w, k) => { const gt = w.length > 5, v = isVowel(w[0]); fillRow(k, { len: String(w.length), gt: String(gt), first: w[0].toUpperCase(), v: String(v), or: String(gt || v), keep: gt || v ? "keep" : "drop" }); });
+  eq("p2 learn all rows right", $("p2-learn-msg").textContent.includes("[iron, oak, catapult]"), true);
   // drive the real UI: one wrong answer, then right answers everywhere
   try { localStorage.removeItem(KEY); } catch (e) {}
   S = { name: "Test", period: "1", done: {}, tries: {}, doneAt: {} };
